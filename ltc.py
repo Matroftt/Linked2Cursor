@@ -1,8 +1,21 @@
+'''
+list of some abbreviations in this code
+ln - level number
+kb - killblock/killbrick
+plr - player
+'''
+
+
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1000, 700
+WIDTH, HEIGHT = 1200, 700
 plr_img = pg.image.load('icon.png')
 cursor = pg.Rect(0,0,1,1)
 
+print('Only existing levels yet are 0 and 1')
+lvl = input('Go to level... ')
+if lvl == '':
+    lvl = 0
+lvl = int(lvl)
 
 class Player:
     def __init__(self, game):
@@ -11,7 +24,8 @@ class Player:
         self.plr = pg.Rect(100,110,18,18)
         self.cap = 0
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
-    def player(self):
+        self.level = Level(self) 
+    def instance(self):
         if cursor.colliderect(self.plr):
             if self.game.paused == 0:
                 if self.cap == 0:
@@ -28,21 +42,40 @@ class Player:
             self.plr.top = self.mouse_y - 9
         else:
             pass
-
+    def check(self):
+        for i in range(len(self.level.lvl[self.level.ln])):
+            self.kb = pg.Rect(self.level.lvl[self.level.ln][i][0], self.level.lvl[self.level.ln][i][1], self.level.lvl[self.level.ln][i][2], self.level.lvl[self.level.ln][i][3])
+            if self.plr.colliderect(self.kb):
+                print("!")
+class Level:
+    def __init__(self, game, ln=lvl):
+        self.game = game
+        self.ln = ln # ln = level number
+        self.lvl = [
+                        [
+                         [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],
+                         [0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT]   # Resizable frame
+                        ],
+                        
+                        [[500,500,50,50]]
+                   ]
+    def run(self,ln=1):
+        for i in range(len(self.lvl[self.ln])):
+            self.game.block = Obstacle(self.game, self.lvl[self.ln][i][0], self.lvl[self.ln][i][1], self.lvl[self.ln][i][2], self.lvl[self.ln][i][3])
+            self.game.block.blit()
 class Obstacle:
     def __init__(self, game, l=10, t=10, w=100, h=100, id=0, type="static"):
         self.game = game
-        self.capect = pg.Rect(l,t,w,h)
+        self.rect = pg.Rect(l,t,w,h)
         #print(l,t,w,h,id)
     def blit(self):
-        pg.draw.rect(self.game.app.sc, (0,0,0), self.capect)
+        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect)
         
 class Game:
     def __init__(self, app):
         self.app = app
         self.player = Player(self)
-        for i in range(10):
-            self.block = Obstacle(self, l=10+i*10, t=10+i*10)        
+        self.level = Level(self) 
         self.paused = False
         
     def background(self):
@@ -53,16 +86,12 @@ class Game:
     
     def run(self):
         self.background()
-        self.player.player()
+        self.player.instance()
+        self.player.check()
+        self.level.run()
         
         # draw objects
         self.setup()
-        for i in range(6):
-            self.block = Obstacle(self, l=10+i*150, t=0, w=15, h=300)     
-            self.block.blit()
-        for i in range(6):
-            self.block = Obstacle(self, l=(10+i*150)-100, t=300, w=15, h=300)     
-            self.block.blit()
         
         # Ball moving
         #self.obj.check_collision()
