@@ -29,7 +29,6 @@ class Player:
     def __init__(self, game):
         self.game = game
         self.paused = False
-        self.level = Level(self) 
         self.plr = pg.Rect(0,0,18,18)
         self.cap = 0
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
@@ -52,8 +51,8 @@ class Player:
         else:
             pass
     def check(self):
-        for i in range(len(self.level.lvl[self.level.ln])):
-            self.kb = pg.Rect(self.level.lvl[self.level.ln][i][0], self.level.lvl[self.level.ln][i][1], self.level.lvl[self.level.ln][i][2], self.level.lvl[self.level.ln][i][3])
+        for i in range(len(self.game.level.lvl[self.game.level.ln])):
+            self.kb = pg.Rect(self.game.level.lvl[self.game.level.ln][i][0], self.game.level.lvl[self.game.level.ln][i][1], self.game.level.lvl[self.game.level.ln][i][2], self.game.level.lvl[self.game.level.ln][i][3])
             if self.plr.colliderect(self.kb):
                 self.reset()
     def check_win(self):
@@ -63,8 +62,8 @@ class Player:
             self.game.level.ln += 1
       
     def reset(self):
-        self.plr.left = self.level.sl[self.level.ln][0]
-        self.plr.top = self.level.sl[self.level.ln][1]
+        self.plr.left = self.game.level.sl[self.game.level.ln][0]
+        self.plr.top = self.game.level.sl[self.game.level.ln][1]
         
 class Level:
     def __init__(self, game, ln=lvl):
