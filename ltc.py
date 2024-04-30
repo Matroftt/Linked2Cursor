@@ -18,10 +18,33 @@ arrow left - moves character up and left
 
 
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1000, 750
-plr_img = pg.image.load('assets/icon.png')
+WIDTH, HEIGHT = 1024, 768
 cursor = pg.Rect(0,0,1,1)
 
+class Cover:
+    def __init__(self, game):
+        self.game = game
+        self.cover_img = pg.image.load('assets/cover.png')
+        self.cover = pg.Rect(500, 500, 200, 200)
+    def run(self):
+        self.blit()
+        self.cover.centerx = self.game.player.plr.left + self.game.player.plr.width/2
+        self.cover.centery = self.game.player.plr.top + self.game.player.plr.height/2
+        
+    def blit(self):
+        self.rect1 = pg.Rect(0,self.cover.top-HEIGHT,WIDTH,HEIGHT)
+        self.rect2 = pg.Rect(0,self.cover.bottom,WIDTH,HEIGHT)
+        self.rect3 = pg.Rect(self.cover.right,0,WIDTH,HEIGHT)
+        self.rect4 = pg.Rect(self.cover.left-WIDTH,0,WIDTH,HEIGHT)
+        self.game.app.sc.blit(self.cover_img,(self.cover.left,self.cover.top))
+        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect1)
+        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect2)
+        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect3)
+        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect4)
+        
+        
+        
+        
 class Cursor:
     def __init__(self):
         global cursor
@@ -38,6 +61,7 @@ class Player:
         self.plr = pg.Rect(0,0,18,18)
         self.cap = 0
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
+        self.plr_img = pg.image.load('assets/icon.png')
         
     def instance(self):
         self.cursor.run()
@@ -47,7 +71,7 @@ class Player:
                     self.cap = 1
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
                
-        self.game.app.sc.blit(plr_img,(self.plr.left,self.plr.top))   
+        self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))   
         
         if self.cap == 1:  
             self.plr.left = self.mouse_x - 9
@@ -178,6 +202,7 @@ class Game:
         self.app = app
         self.player = Player(self)
         self.level = Level(self)
+        self.cover = Cover(self)
         self.cursor = Cursor()
         self.tab = 'menu'
         self.paused = False
@@ -220,10 +245,12 @@ class Game:
                 self.bool = ''
                 time.sleep(0.05)
         elif self.tab == 'play':
+            self.cover.run()
             self.player.instance()
             self.player.check()
             self.player.check_win()
             self.level.run()
+            
             
             key = pg.key.get_pressed()
             if key[pg.K_UP]:
