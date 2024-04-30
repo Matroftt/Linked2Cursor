@@ -259,6 +259,7 @@ class App:
         self.clock = pg.time.Clock()
         self.game = Game(self)
         self.read_config()
+        self.play_music()
         #print(self.config.read(1))
         
     def exit(self):
@@ -267,19 +268,12 @@ class App:
     def read_config(self):
         self.config = open('assets/cfg.txt', 'r')
         self.music_state = int(self.config.read(1))
-        print(self.music_state)
-        self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
         # 0 - music do not play; 1 - music plays
-        if self.music_state:
-            print("Music is enabled")
-            self.play_music()
-        else:
-            print("Music is disabled")
         self.config.close()
     def play_music(self):
+        self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
         pg.mixer.music.play(-1)
-        
-        
+
     def check_events(self):     
         for event in pg.event.get():
             if event.type == pg.QUIT:
