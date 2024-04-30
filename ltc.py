@@ -5,6 +5,9 @@ sl - spawn location
 fl - finish location
 kb - killblock/killbrick
 plr - player
+l - left; t - top; w - width; h - height
+lo - left offset; to - top offset
+clr - colour; hclr - highlight colour; bclr - backup colour
 
 list of hotkeys
 space - pause
@@ -15,16 +18,18 @@ arrow left - moves character up and left
 
 
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1200, 700
-plr_img = pg.image.load('icon.png')
+WIDTH, HEIGHT = 1000, 600
+plr_img = pg.image.load('assets/icon.png')
 cursor = pg.Rect(0,0,1,1)
 
-print('Only existing levels yet are 0-2 and 3-903 that are randomly generated')
-lvl = input('Go to level... ')
-if lvl == '':
-    lvl = 0
-lvl = int(lvl)
-
+class Cursor:
+    def __init__(self):
+        global cursor
+        self.cursor = cursor
+    def run(self):
+        self.mouse_xx, self.mouse_yy = pg.mouse.get_pos()
+        cursor.left = self.mouse_xx
+        cursor.top = self.mouse_yy 
 class Player:
     def __init__(self, game):
         self.game = game
@@ -38,12 +43,9 @@ class Player:
             if self.game.paused == 0:
                 if self.cap == 0:
                     self.cap = 1
-                self.mouse_x,self.mouse_y = pg.mouse.get_pos()
+        self.mouse_x,self.mouse_y = pg.mouse.get_pos()
                
-        self.game.app.sc.blit(plr_img,(self.plr.left,self.plr.top))
-        self.mouse_xx, self.mouse_yy = pg.mouse.get_pos()
-        cursor.left = self.mouse_xx
-        cursor.top = self.mouse_yy    
+        self.game.app.sc.blit(plr_img,(self.plr.left,self.plr.top))   
         
         if self.cap == 1:  
             self.plr.left = self.mouse_x - 9
@@ -57,7 +59,7 @@ class Player:
                 self.reset()
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
-            print("Completed")
+            print('Level '+str(self.game.level.ln),"Completed")
             self.reset()
             self.game.level.ln += 1
       
@@ -66,21 +68,21 @@ class Player:
         self.plr.top = self.game.level.sl[self.game.level.ln][1]
         
 class Level:
-    def __init__(self, game, ln=lvl):
+    def __init__(self, game, ln=0):
         self.game = game
-        self.ln = ln 
+        self.ln = ln
         self.lvl = [
-                        [
-                         [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],
-                         [0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT]   # Resizable frame
-                        ],
-                        
-                        [[500,500,50,50]],
-                        
-                        [
-                            [300,300,20,20], [240,240,20,20] 
+                            [
+                                [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],
+                                [0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT]
+                            ], 
+                            [
+                                [500,500,50,50]
+                            ],      
+                            [
+                                [300,300,20,20], [240,240,20,20] 
+                            ]
                         ]
-                   ]
         
         self.sl = [
                     [WIDTH/2, HEIGHT/2],
@@ -122,59 +124,111 @@ class Obstacle:
         
     def blit(self):
         pg.draw.rect(self.game.app.sc, self.color, self.rect)
-        
+class Button:
+    def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text="Button", clr=(100,100,100), hclr=(150,150,150), lo=0, to=0, action=None):
+        self.game = game
+        self.shadow = shadow
+        self.font = pg.font.SysFont("Courier new", 40)  
+        self.text = self.font.render(text,1,(0,0,0))
+        self.clr = clr
+        self.bclr = clr
+        self.hclr = hclr
+        self.rect = pg.Rect(l,t,w,h)
+        self.l = l
+        self.t = t
+        self.w = w
+        self.h = h
+        self.lo = lo
+        self.to = to
+        self.action = action
+        if self.shadow == 1:
+            self.shadow_rect = pg.Rect(l+2,t+2,w,h)
+    def run(self):
+        self.blit()
+        self.check()
+    def blit(self):
+        if self.shadow == 1:
+            pg.draw.rect(self.game.app.sc, (0,0,0), self.shadow_rect)
+        pg.draw.rect(self.game.app.sc, self.clr, self.rect)
+        self.game.app.sc.blit(self.text,(self.l+self.w/6-self.lo, self.t+self.h/10))
+    def check(self):
+        self.pressed = pg.mouse.get_pressed()
+        if self.rect.colliderect(cursor):
+            self.clr = self.hclr
+            if self.pressed[0]:
+                self.actions()
+                time.sleep(0.1)
+        else:
+            self.clr = self.bclr
+    def actions(self):
+        if self.action == "exit" or self.action == "leave":
+            self.game.app.exit()
+        elif self.action == "play":
+            self.game.tab ="play"
+        elif self.action == None:
+            print("No action set for this button!")
 class Game:
     def __init__(self, app):
         self.app = app
         self.player = Player(self)
-        self.level = Level(self) 
+        self.level = Level(self)
+        self.cursor = Cursor()
+        self.tab = "menu"
         self.paused = False
+        self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text="Play", action="play")
+        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text="Avatar", lo=WIDTH/50)
+        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text="Exit", action="leave")
         
     def background(self):
+        global a, b, c, clr
         self.app.sc.fill((0,0,0))
-        pg.draw.rect(self.app.sc,(125,150,200),(0,0,WIDTH,HEIGHT))
+        pg.draw.rect(self.app.sc,(255,255,255),(0,0,WIDTH,HEIGHT))
+        
     def setup(self):
         pass
     
     def run(self):
+        self.cursor.run()
         self.background()
-        self.player.instance()
-        self.player.check()
-        self.player.check_win()
-        self.level.run()
-        
-        # draw objects
-        self.setup()
-        
-        # Ball moving
-        #self.obj.check_collision()
-        
-        
-        # move
-        key = pg.key.get_pressed()
-        if key[pg.K_UP]:
-            self.level.ln -= 1
-            time.sleep(0.15)
-        if key[pg.K_DOWN]:
-            self.level.ln += 1
-            time.sleep(0.15)
-        
+        if self.tab == "menu":
+            self.play_button.run()
+            self.icons_button.run()
+            self.exit_button.run()
             
-        if key[pg.K_LEFT]:
-            self.player.plr.left -= 20
-            self.player.plr.top -= 20
-        if key[pg.K_RIGHT]:
-            pass
-        if key[pg.K_SPACE]:
+        elif self.tab == "play":
+            self.player.instance()
+            self.player.check()
+            self.player.check_win()
+            self.level.run()
+            
+            # draw objects
+            self.setup()
+
+            # move
+            key = pg.key.get_pressed()
+            if key[pg.K_UP]:
+                self.level.ln -= 1
+                time.sleep(0.15)
+            if key[pg.K_DOWN]:
+                self.level.ln += 1
+                time.sleep(0.15)
+            
+                
+            if key[pg.K_LEFT]:
+                self.player.plr.left -= 20
+                self.player.plr.top -= 20
+            if key[pg.K_RIGHT]:
+                pass
+            if key[pg.K_SPACE]:
+                if self.paused == 1:
+                    self.paused = 0
+                else:
+                    self.paused = 1
+                time.sleep(0.1)
             if self.paused == 1:
-                self.paused = 0
-            else:
-                self.paused = 1
-            time.sleep(0.1)
-        if self.paused == 1:
-            font = pg.font.SysFont("Courier new", 50)
-            pause = font.render('-- PAUSE --',0,(255,255,255))
-            self.app.sc.blit(pause,(WIDTH//3,HEIGHT//2-50))
+                font = pg.font.SysFont("Courier new", 50)
+                pause = font.render('-- PAUSE --',0,(255,255,255))
+                self.app.sc.blit(pause,(WIDTH//3,HEIGHT//2-50))
         # Font
         
 class App:
@@ -184,6 +238,7 @@ class App:
         self.sc = pg.display.set_mode((WIDTH, HEIGHT))
         self.clock = pg.time.Clock()
         self.game = Game(self)
+        
         #pg.mixer.music.load("resources/music.mp3")
        # pg.mixer.music.play(-1)
     def exit(self):
