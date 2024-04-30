@@ -34,11 +34,13 @@ class Player:
     def __init__(self, game):
         self.game = game
         self.paused = False
+        self.cursor = Cursor()
         self.plr = pg.Rect(0,0,18,18)
         self.cap = 0
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
         
     def instance(self):
+        self.cursor.run()
         if cursor.colliderect(self.plr):
             if self.game.paused == 0:
                 if self.cap == 0:
@@ -56,10 +58,11 @@ class Player:
         for i in range(len(self.game.level.lvl[self.game.level.ln])):
             self.kb = pg.Rect(self.game.level.lvl[self.game.level.ln][i][0], self.game.level.lvl[self.game.level.ln][i][1], self.game.level.lvl[self.game.level.ln][i][2], self.game.level.lvl[self.game.level.ln][i][3])
             if self.plr.colliderect(self.kb):
-                self.reset()
+                self.reset()       
+                self.cap = 0
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
-            print('Level '+str(self.game.level.ln),"Completed")
+            print('Level '+str(self.game.level.ln),'Completed')
             self.reset()
             self.game.level.ln += 1
       
@@ -102,33 +105,33 @@ class Level:
             self.sl.append([random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)])
             self.fl.append([random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)])
             
-        self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type="finish")
+        self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
     def run(self):
         for i in range(len(self.lvl[self.ln])):
             self.game.block = Obstacle(self.game, self.lvl[self.ln][i][0], self.lvl[self.ln][i][1], self.lvl[self.ln][i][2], self.lvl[self.ln][i][3])
             self.game.block.blit()
-            self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type="finish")
+            self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
             self.game.finish.blit()
-        numfont = pg.font.SysFont("Courier new", 50)
+        numfont = pg.font.SysFont('Courier new', 50)
         numtext = numfont.render(str(self.ln),0,(100,100,100))
         self.game.app.sc.blit(numtext,(WIDTH//10,HEIGHT//5-50))
 class Obstacle:
-    def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type="kb"):
+    def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type='kb'):
         self.game = game
         self.color = color
         self.type = type
         self.rect = pg.Rect(l,t,w,h)
         
-        if self.type == "finish" and self.color == (0,0,0):
+        if self.type == 'finish' and self.color == (0,0,0):
             self.color = (100,5,5)
         
     def blit(self):
         pg.draw.rect(self.game.app.sc, self.color, self.rect)
 class Button:
-    def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text="Button", clr=(100,100,100), hclr=(150,150,150), lo=0, to=0, action=None):
+    def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text='Button', clr=(100,100,100), hclr=(150,150,150), lo=0, to=0, action=None):
         self.game = game
         self.shadow = shadow
-        self.font = pg.font.SysFont("Courier new", 40)  
+        self.font = pg.font.SysFont('Courier new', 40)  
         self.text = self.font.render(text,1,(0,0,0))
         self.clr = clr
         self.bclr = clr
@@ -161,23 +164,23 @@ class Button:
         else:
             self.clr = self.bclr
     def actions(self):
-        if self.action == "exit" or self.action == "leave":
+        if self.action == 'exit' or self.action == 'leave':
             self.game.app.exit()
-        elif self.action == "play":
-            self.game.tab ="play"
+        elif self.action == 'play':
+            self.game.tab ='play'
         elif self.action == None:
-            print("No action set for this button!")
+            print('No action set for this button!', self.rect)
 class Game:
     def __init__(self, app):
         self.app = app
         self.player = Player(self)
         self.level = Level(self)
         self.cursor = Cursor()
-        self.tab = "menu"
+        self.tab = 'menu'
         self.paused = False
-        self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text="Play", action="play")
-        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text="Avatar", lo=WIDTH/50)
-        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text="Exit", action="leave")
+        self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play')
+        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50)
+        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave')
         
     def background(self):
         global a, b, c, clr
@@ -190,12 +193,12 @@ class Game:
     def run(self):
         self.cursor.run()
         self.background()
-        if self.tab == "menu":
+        if self.tab == 'menu':
             self.play_button.run()
             self.icons_button.run()
             self.exit_button.run()
             
-        elif self.tab == "play":
+        elif self.tab == 'play':
             self.player.instance()
             self.player.check()
             self.player.check_win()
@@ -226,7 +229,7 @@ class Game:
                     self.paused = 1
                 time.sleep(0.1)
             if self.paused == 1:
-                font = pg.font.SysFont("Courier new", 50)
+                font = pg.font.SysFont('Courier new', 50)
                 pause = font.render('-- PAUSE --',0,(255,255,255))
                 self.app.sc.blit(pause,(WIDTH//3,HEIGHT//2-50))
         # Font
@@ -239,7 +242,7 @@ class App:
         self.clock = pg.time.Clock()
         self.game = Game(self)
         
-        #pg.mixer.music.load("resources/music.mp3")
+        #pg.mixer.music.load('resources/music.mp3')
        # pg.mixer.music.play(-1)
     def exit(self):
         pg.quit()
