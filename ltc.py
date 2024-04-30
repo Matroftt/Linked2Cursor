@@ -18,7 +18,7 @@ arrow left - moves character up and left
 
 
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1000, 600
+WIDTH, HEIGHT = 1000, 750
 plr_img = pg.image.load('assets/icon.png')
 cursor = pg.Rect(0,0,1,1)
 
@@ -153,7 +153,7 @@ class Button:
         if self.shadow == 1:
             pg.draw.rect(self.game.app.sc, (0,0,0), self.shadow_rect)
         pg.draw.rect(self.game.app.sc, self.clr, self.rect)
-        self.game.app.sc.blit(self.text,(self.l+self.w/6-self.lo, self.t+self.h/10))
+        self.game.app.sc.blit(self.text,(self.l+self.w/6-self.lo, self.t+self.h/10-self.to))
     def check(self):
         self.pressed = pg.mouse.get_pressed()
         if self.rect.colliderect(cursor):
@@ -166,10 +166,13 @@ class Button:
     def actions(self):
         if self.action == 'exit' or self.action == 'leave':
             self.game.app.exit()
-        elif self.action == 'play':
-            self.game.tab ='play'
         elif self.action == None:
             print('No action set for this button!', self.rect)
+        elif list(self.action)[0] == 'b' and list(self.action)[3] == 'l' and list(self.action)[4] == '_':
+            self.bool_action = str(self.action.split('bool_')[1])
+            self.game.bool = self.bool_action
+        else:
+            self.game.tab = self.action
 class Game:
     def __init__(self, app):
         self.app = app
@@ -178,9 +181,15 @@ class Game:
         self.cursor = Cursor()
         self.tab = 'menu'
         self.paused = False
-        self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play')
-        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50)
-        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave')
+        self.font = pg.font.SysFont('Courier new', 50)
+        self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
+        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125)
+        self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
+        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
+        self.bool_music_button = Button(self, WIDTH//50, HEIGHT//3+75, WIDTH/20, WIDTH/20, text='•', action='bool_music')
+        
+        self.bool = ''
+        self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
         
     def background(self):
         global a, b, c, clr
@@ -196,18 +205,26 @@ class Game:
         if self.tab == 'menu':
             self.play_button.run()
             self.icons_button.run()
+            self.settings_button.run()  
             self.exit_button.run()
-            
+        elif self.tab == 'settings':
+            self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
+            self.app.sc.blit(self.font.render('Res: '+str(WIDTH)+'; '+str(HEIGHT),0,(0,0,0)),(WIDTH//10,HEIGHT//2-100))
+            self.bool_music_button.run()
+            self.back_button.run()
+            if self.bool == 'music':
+                if self.app.music_state == 0:
+                    self.app.music_state = 1
+                else:
+                    self.app.music_state = 0
+                self.bool = ''
+                time.sleep(0.05)
         elif self.tab == 'play':
             self.player.instance()
             self.player.check()
             self.player.check_win()
             self.level.run()
             
-            # draw objects
-            self.setup()
-
-            # move
             key = pg.key.get_pressed()
             if key[pg.K_UP]:
                 self.level.ln -= 1
@@ -215,7 +232,6 @@ class Game:
             if key[pg.K_DOWN]:
                 self.level.ln += 1
                 time.sleep(0.15)
-            
                 
             if key[pg.K_LEFT]:
                 self.player.plr.left -= 20
@@ -229,11 +245,12 @@ class Game:
                     self.paused = 1
                 time.sleep(0.1)
             if self.paused == 1:
-                font = pg.font.SysFont('Courier new', 50)
-                pause = font.render('-- PAUSE --',0,(255,255,255))
-                self.app.sc.blit(pause,(WIDTH//3,HEIGHT//2-50))
-        # Font
-        
+                self.pause = self.font.render('-- PAUSE --',0,(255,255,255))
+                self.app.sc.blit(self.pause,(WIDTH//3,HEIGHT//2-50))
+        else:
+            print("This kind of tab does not exist.")
+            self.tab = "menu"
+
 class App:
     def __init__(self):
         pg.init()
@@ -241,26 +258,44 @@ class App:
         self.sc = pg.display.set_mode((WIDTH, HEIGHT))
         self.clock = pg.time.Clock()
         self.game = Game(self)
+        self.read_config()
+        #print(self.config.read(1))
         
-        #pg.mixer.music.load('resources/music.mp3')
-       # pg.mixer.music.play(-1)
     def exit(self):
         pg.quit()
         sys.exit()
+    def read_config(self):
+        self.config = open('assets/cfg.txt', 'r')
+        self.music_state = int(self.config.read(1))
+        print(self.music_state)
+        self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
+        # 0 - music do not play; 1 - music plays
+        if self.music_state:
+            print("Music is enabled")
+            self.play_music()
+        else:
+            print("Music is disabled")
+        self.config.close()
     def play_music(self):
-        pass
-    def check_events(self):
+        pg.mixer.music.play(-1)
         
+        
+    def check_events(self):     
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                self.exit() 
-                    
+                self.exit()
+    
+    def check_music(self):
+        if self.music_state:
+            pg.mixer.music.unpause()
+        elif self.music_state == 0:
+            pg.mixer.music.pause()
     def run(self):
-        
         while True:
-            self.play_music()
+            
             self.game.run()
             self.check_events()
+            self.check_music()
             pg.display.update()
             self.clock.tick(75)
 
