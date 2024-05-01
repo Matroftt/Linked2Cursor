@@ -7,13 +7,14 @@ kb - killblock/killbrick
 plr - player
 l - left; t - top; w - width; h - height
 lo - left offset; to - top offset
-clr - colour; hclr - highlight colour; bclr - backup colour
+clr - colour; hclr - highlight colour; bclr - backup colour; pclr - press colour
 
 list of hotkeys
 space - pause
 arrow up - previous level
 arrow down - next level
 arrow left - moves character up and left
+escape - exit to menu
 '''
 
 
@@ -50,9 +51,9 @@ class Cursor:
         global cursor
         self.cursor = cursor
     def run(self):
-        self.mouse_xx, self.mouse_yy = pg.mouse.get_pos()
-        cursor.left = self.mouse_xx
-        cursor.top = self.mouse_yy 
+        self.mouse_x, self.mouse_y = pg.mouse.get_pos()
+        cursor.left = self.mouse_x
+        cursor.top = self.mouse_y 
 class Player:
     def __init__(self, game):
         self.game = game
@@ -105,11 +106,9 @@ class Level:
                              [WIDTH/1.77, HEIGHT/6.92, WIDTH/24.98, HEIGHT/1.17], [WIDTH/3.2, HEIGHT/2.19, WIDTH/1.83, HEIGHT/17.35],
                              [WIDTH/1.32, 0, WIDTH/4.11, HEIGHT/3.93], [WIDTH/1.39, HEIGHT/1.42, WIDTH/3.56, HEIGHT/17.35],
                              [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
-                             
-                             
                         ], 
                         [
-                            [500,500,50,50]
+                            [0, 0, WIDTH/(WIDTH/1000), HEIGHT/(HEIGHT/21.4)], [0, HEIGHT/(HEIGHT/579.57), WIDTH/(WIDTH/1000), HEIGHT/(HEIGHT/21.42)], [0, 0, WIDTH/(WIDTH/25.0), HEIGHT/(HEIGHT/600)], [WIDTH/(WIDTH/976.0), 0, WIDTH/(WIDTH/25.0), HEIGHT/(HEIGHT/600)], [WIDTH/(WIDTH/20), HEIGHT/(HEIGHT/10), WIDTH/(WIDTH/290), HEIGHT/(HEIGHT/260)], [WIDTH/(WIDTH/20), HEIGHT/(HEIGHT/10), WIDTH/(WIDTH/970), HEIGHT/(HEIGHT/80)], [WIDTH/(WIDTH/460), HEIGHT/(HEIGHT/300), WIDTH/(WIDTH/110), HEIGHT/(HEIGHT/130)]
                         ],      
                         [
                             [300,300,20,20], [240,240,20,20] 
@@ -161,13 +160,14 @@ class Obstacle:
     def blit(self):
         pg.draw.rect(self.game.app.sc, self.color, self.rect)
 class Button:
-    def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text='Button', clr=(100,100,100), hclr=(150,150,150), lo=0, to=0, action=None):
+    def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text='Button', clr=(100,100,100), hclr=(150,150,150), pclr=(25,25,25), lo=0, to=0, action=None):
         self.game = game
         self.shadow = shadow
         self.font = pg.font.SysFont('Courier new', 40)  
         self.text = self.font.render(text,1,(0,0,0))
         self.clr = clr
         self.bclr = clr
+        self.pclr = pclr
         self.hclr = hclr
         self.rect = pg.Rect(l,t,w,h)
         self.l = l
@@ -177,6 +177,7 @@ class Button:
         self.lo = lo
         self.to = to
         self.action = action
+        self.press = 0
         if self.shadow == 1:
             self.shadow_rect = pg.Rect(l+2,t+2,w,h)
     def run(self):
@@ -192,9 +193,16 @@ class Button:
         if self.rect.colliderect(cursor):
             self.clr = self.hclr
             if self.pressed[0]:
+                self.press = 1
+                self.clr = self.pclr
+            elif not self.pressed[0] and self.press == 1:
+                self.press = 0
                 self.actions()
-                time.sleep(0.1)
+                self.clr = self.bclr
+                time.sleep(0.01)
+                
         else:
+            self.press = 0
             self.clr = self.bclr
     def actions(self):
         if self.action == 'exit' or self.action == 'leave':
@@ -216,14 +224,21 @@ class Game:
         self.tab = 'menu'
         self.paused = False
         self.font = pg.font.SysFont('Courier new', 50)
+        self.editor_font = pg.font.SysFont('Courier new', 15)
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
         self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125)
-        self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
-        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
+        self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
+        self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
+        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
         self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+50, WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
         self.bool = ''
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
+        
+        #Editor
+        self.obj_list = [[0,0,WIDTH,HEIGHT/28],[0,HEIGHT-HEIGHT/28+1,WIDTH,HEIGHT/28],
+                        [0,0,WIDTH/40,HEIGHT],[WIDTH-WIDTH/40+1,0,WIDTH/40,HEIGHT]]
+        self.grid_size = 10
         
     def background(self):
         global a, b, c, clr
@@ -236,13 +251,77 @@ class Game:
         self.app.write_config()
     
     def run(self):
+        self.key = pg.key.get_pressed()
         self.cursor.run()
         self.background()
         if self.tab == 'menu':
             self.play_button.run()
             self.icons_button.run()
+            self.editor_button.run()
             self.settings_button.run()  
             self.exit_button.run()
+        elif self.tab == 'editor':
+            self.pressed = pg.mouse.get_pressed()
+            
+            if self.pressed[0]:
+                self.left, self.top = pg.mouse.get_pos()
+                self.left = round(self.left/self.grid_size)*self.grid_size
+                self.top = round(self.top/self.grid_size)*self.grid_size
+                print(self.left, self.top)
+                
+            if self.pressed[2]:
+                self.right, self.bottom = pg.mouse.get_pos()
+                self.right = round(self.right/self.grid_size)*self.grid_size
+                self.bottom = round(self.bottom/self.grid_size)*self.grid_size
+                print(self.right, self.bottom)
+                
+            if self.key[pg.K_UP]:
+                self.obj_list = [[0,0,WIDTH,HEIGHT/28],[0,HEIGHT-HEIGHT/28+1,WIDTH,HEIGHT/28],
+                                [0,0,WIDTH/40,HEIGHT],[WIDTH-WIDTH/40+1,0,WIDTH/40,HEIGHT]]
+            if self.key[pg.K_DOWN]:
+                for i in range(len(self.obj_list)):
+                    if self.obj_list[i][0] != 0:
+                        self.obj_list[i][0] = 'WIDTH/(WIDTH/'+str(round(self.obj_list[i][0],2))+')'
+                    else:
+                        self.obj_list[i][0] = 0
+                    if self.obj_list[i][1] != 0:
+                        self.obj_list[i][1] = 'HEIGHT/(HEIGHT/'+str(round(self.obj_list[i][1],2))+')'
+                    else:
+                        self.obj_list[i][1] = 0
+                    self.obj_list[i][2] = 'WIDTH/(WIDTH/'+str(self.obj_list[i][2])+')'
+                    self.obj_list[i][3] = 'HEIGHT/(HEIGHT/'+str(self.obj_list[i][3])+')'
+                    
+                    
+                    
+                print(self.obj_list)
+            
+                
+            if self.key[pg.K_RIGHT]:
+                self.grid_size += 5
+                time.sleep(0.05)
+                
+            if self.key[pg.K_LEFT]:
+                self.grid_size -= 5
+                if self.grid_size < 0:
+                    self.grid_size = 0
+                time.sleep(0.05)
+                
+            if self.key[pg.K_SPACE]:
+                self.obj_list.append([self.left, self.top, self.right-self.left, self.bottom-self.top])
+                time.sleep(0.33)
+                
+            for i in range(len(self.obj_list)):
+                self.rect = Obstacle(self, self.obj_list[i][0],self.obj_list[i][1],self.obj_list[i][2],self.obj_list[i][3])
+                self.rect.blit()
+            
+            self.app.sc.blit(self.editor_font.render('Grid:'+str(self.grid_size)+'; K_LEFT K_RIGHT to change value; K_UP to reset; K_DOWN to print result into console (will crash!)',0,(100,255,100)),(0,0))
+            self.app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(100,255,100)),(0,HEIGHT-15))
+            
+                
+            if self.key[pg.K_ESCAPE]:
+                self.tab = 'menu'
+                
+                
         elif self.tab == 'settings':
             self.app.sc.blit(self.font.render('Res: '+str(WIDTH)+'; '+str(HEIGHT),0,(0,0,0)),(WIDTH//10,HEIGHT//2-100))
             self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
@@ -269,22 +348,18 @@ class Game:
             self.player.check()
             self.player.check_win()
             self.level.run()
-            
-            
-            key = pg.key.get_pressed()
-            if key[pg.K_UP]:
+            if self.key[pg.K_UP]:
                 self.level.ln -= 1
                 time.sleep(0.15)
-            if key[pg.K_DOWN]:
+            if self.key[pg.K_DOWN]:
                 self.level.ln += 1
                 time.sleep(0.15)
-                
-            if key[pg.K_LEFT]:
+            if self.key[pg.K_LEFT]:
                 self.player.plr.left -= 20
                 self.player.plr.top -= 20
-            if key[pg.K_ESCAPE]:
+            if self.key[pg.K_ESCAPE]:
                 self.tab = 'menu'
-            if key[pg.K_SPACE]:
+            if self.key[pg.K_SPACE]:
                 if self.paused == 1:
                     self.paused = 0
                 else:
