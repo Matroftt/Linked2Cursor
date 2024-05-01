@@ -55,12 +55,12 @@ class Cursor:
         cursor.left = self.mouse_x
         cursor.top = self.mouse_y 
 class Player:
-    def __init__(self, game):
+    def __init__(self, game, cap=0):
         self.game = game
         self.paused = False
         self.cursor = Cursor()
         self.plr = pg.Rect(0,0,18,18)
-        self.cap = 0
+        self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
         self.plr_img = pg.image.load('assets/icon.png')
         
@@ -276,7 +276,8 @@ class Game:
                 print(self.right, self.bottom)
                 
             if self.key[pg.K_UP]:
-                self.obj_list = self.level.frame
+                self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
+                                [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
             if self.key[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
@@ -297,7 +298,9 @@ class Game:
                         self.obj_list[i][3] = 0
                              
                 print(self.obj_list)
-            
+                self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
+                                 [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
+                time.sleep(0.33)
                 
             if self.key[pg.K_RIGHT]:
                 self.grid_size += 5
@@ -312,13 +315,21 @@ class Game:
             if self.key[pg.K_SPACE]:
                 self.obj_list.append([self.left, self.top, self.right-self.left, self.bottom-self.top])
                 time.sleep(0.33)
+            
+            if self.key[pg.K_TAB]:
+                self.app.sc.blit(self.player.plr_img,(self.cursor.mouse_x-self.player.plr.width,self.cursor.mouse_y-self.player.plr.height))
+            if self.key[pg.K_BACKSPACE]:
+                self.del_obj = self.obj_list.pop(len(self.obj_list)-1)
+                time.sleep(0.2)
+            
                 
             for i in range(len(self.obj_list)):
                 self.rect = Obstacle(self, self.obj_list[i][0],self.obj_list[i][1],self.obj_list[i][2],self.obj_list[i][3])
                 self.rect.blit()
             
-            self.app.sc.blit(self.editor_font.render('Grid:'+str(self.grid_size)+'; K_LEFT K_RIGHT to change value; K_UP to reset; K_DOWN to print result into console (will crash!)',0,(100,255,100)),(0,0))
-            self.app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(100,255,100)),(0,HEIGHT-15))
+            self.app.sc.blit(self.editor_font.render('Grid:'+str(self.grid_size)+'; K_LEFT K_RIGHT to change the value; K_UP to reset; K_DOWN to print result into console and reset.',0,(150,215,150)),(0,0))
+            self.app.sc.blit(self.editor_font.render('TAB to show test player; BACKSPACE to remove last object.',0,(150,215,150)),(0,15))
+            self.app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(150,215,150)),(0,HEIGHT-15))
             
                 
             if self.key[pg.K_ESCAPE]:
