@@ -19,7 +19,7 @@ escape - exit to menu
 
 
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1920, 1080
+WIDTH, HEIGHT = 1024,768
 cursor = pg.Rect(0,0,1,1)
 
 class Cover:
@@ -98,17 +98,18 @@ class Player:
 class Level:
     def __init__(self, game, ln=0):
         self.game = game
+        self.frame = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
+                     [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
         self.ln = ln
         self.kb = [
                         [
-                             [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],
-                             [0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT],
+                             self.frame[0], self.frame[1], self.frame[2], self.frame[3],
                              [WIDTH/1.77, HEIGHT/6.92, WIDTH/24.98, HEIGHT/1.17], [WIDTH/3.2, HEIGHT/2.19, WIDTH/1.83, HEIGHT/17.35],
                              [WIDTH/1.32, 0, WIDTH/4.11, HEIGHT/3.93], [WIDTH/1.39, HEIGHT/1.42, WIDTH/3.56, HEIGHT/17.35],
                              [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
                         ], 
                         [
-                             [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],[0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT],[WIDTH/5.12, HEIGHT/7.68, WIDTH/5.12, HEIGHT/2.56], [WIDTH/2.56, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/3.41, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/5.12, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.05, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/1.46, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.28], [WIDTH/1.28, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/1.46, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, 0], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, HEIGHT/1.92], [WIDTH/5.12, HEIGHT/1.92, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.56, HEIGHT/1.54, WIDTH/10.24, HEIGHT/2.56], [WIDTH/2.05, HEIGHT/1.54, WIDTH/10.24, HEIGHT/7.68], [0, HEIGHT/1.1, WIDTH/10.24, HEIGHT/-1.28], [0, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.1]
+                             self.frame[0], self.frame[1], self.frame[2], self.frame[3], [WIDTH/5.12, HEIGHT/7.68, WIDTH/5.12, HEIGHT/2.56], [WIDTH/2.56, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/3.41, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/5.12, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.05, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/1.46, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.28], [WIDTH/1.28, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/1.46, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, 0], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, HEIGHT/1.92], [WIDTH/5.12, HEIGHT/1.92, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.56, HEIGHT/1.54, WIDTH/10.24, HEIGHT/2.56], [WIDTH/2.05, HEIGHT/1.54, WIDTH/10.24, HEIGHT/7.68], [0, HEIGHT/1.1, WIDTH/10.24, HEIGHT/-1.28], [0, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.1]
                         ],      
                         [
                             [300,300,20,20], [240,240,20,20] 
@@ -236,8 +237,7 @@ class Game:
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
         
         #Editor
-        self.obj_list = [[0,0,WIDTH,HEIGHT/28],[0,HEIGHT-HEIGHT/28+1,WIDTH,HEIGHT/28],
-                        [0,0,WIDTH/40,HEIGHT],[WIDTH-WIDTH/40+1,0,WIDTH/40,HEIGHT]]
+        self.obj_list = self.level.frame
         self.grid_size = 10
         
     def background(self):
@@ -276,8 +276,7 @@ class Game:
                 print(self.right, self.bottom)
                 
             if self.key[pg.K_UP]:
-                self.obj_list = [[0,0,WIDTH,HEIGHT/28],[0,HEIGHT-HEIGHT/28+1,WIDTH,HEIGHT/28],
-                                [0,0,WIDTH/40,HEIGHT],[WIDTH-WIDTH/40+1,0,WIDTH/40,HEIGHT]]
+                self.obj_list = self.level.frame
             if self.key[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
