@@ -19,7 +19,7 @@ escape - exit to menu
 
 
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1024, 768
+WIDTH, HEIGHT = 1920, 1080
 cursor = pg.Rect(0,0,1,1)
 
 class Cover:
@@ -108,7 +108,7 @@ class Level:
                              [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
                         ], 
                         [
-                            [0, 0, WIDTH/(WIDTH/1000), HEIGHT/(HEIGHT/21.4)], [0, HEIGHT/(HEIGHT/579.57), WIDTH/(WIDTH/1000), HEIGHT/(HEIGHT/21.42)], [0, 0, WIDTH/(WIDTH/25.0), HEIGHT/(HEIGHT/600)], [WIDTH/(WIDTH/976.0), 0, WIDTH/(WIDTH/25.0), HEIGHT/(HEIGHT/600)], [WIDTH/(WIDTH/20), HEIGHT/(HEIGHT/10), WIDTH/(WIDTH/290), HEIGHT/(HEIGHT/260)], [WIDTH/(WIDTH/20), HEIGHT/(HEIGHT/10), WIDTH/(WIDTH/970), HEIGHT/(HEIGHT/80)], [WIDTH/(WIDTH/460), HEIGHT/(HEIGHT/300), WIDTH/(WIDTH/110), HEIGHT/(HEIGHT/130)]
+                             [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],[0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT],[WIDTH/5.12, HEIGHT/7.68, WIDTH/5.12, HEIGHT/2.56], [WIDTH/2.56, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/3.41, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/5.12, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.05, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/1.46, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.28], [WIDTH/1.28, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/1.46, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, 0], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, HEIGHT/1.92], [WIDTH/5.12, HEIGHT/1.92, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.56, HEIGHT/1.54, WIDTH/10.24, HEIGHT/2.56], [WIDTH/2.05, HEIGHT/1.54, WIDTH/10.24, HEIGHT/7.68], [0, HEIGHT/1.1, WIDTH/10.24, HEIGHT/-1.28], [0, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.1]
                         ],      
                         [
                             [300,300,20,20], [240,240,20,20] 
@@ -116,7 +116,7 @@ class Level:
                   ]
         
         self.sl = [
-                    [WIDTH/5, HEIGHT/1.3],
+                    [WIDTH/5, HEIGHT/1.2],
                     [WIDTH/1.5, HEIGHT/3],
                     [WIDTH/1.5, HEIGHT/3]
                   ]
@@ -281,18 +281,22 @@ class Game:
             if self.key[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
-                        self.obj_list[i][0] = 'WIDTH/(WIDTH/'+str(round(self.obj_list[i][0],2))+')'
+                        self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],2))
                     else:
                         self.obj_list[i][0] = 0
                     if self.obj_list[i][1] != 0:
-                        self.obj_list[i][1] = 'HEIGHT/(HEIGHT/'+str(round(self.obj_list[i][1],2))+')'
+                        self.obj_list[i][1] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][1],2))
                     else:
                         self.obj_list[i][1] = 0
-                    self.obj_list[i][2] = 'WIDTH/(WIDTH/'+str(self.obj_list[i][2])+')'
-                    self.obj_list[i][3] = 'HEIGHT/(HEIGHT/'+str(self.obj_list[i][3])+')'
-                    
-                    
-                    
+                    if self.obj_list[i][2] != 0:
+                        self.obj_list[i][2] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][2],2))
+                    else:
+                        self.obj_list[i][2] = 0
+                    if self.obj_list[i][3] != 0:
+                        self.obj_list[i][3] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][3],2))
+                    else:
+                        self.obj_list[i][3] = 0
+                             
                 print(self.obj_list)
             
                 
