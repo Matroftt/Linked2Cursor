@@ -79,8 +79,8 @@ class Player:
         else:
             pass
     def check(self):
-        for i in range(len(self.game.level.lvl[self.game.level.ln])):
-            self.kb = pg.Rect(self.game.level.lvl[self.game.level.ln][i][0], self.game.level.lvl[self.game.level.ln][i][1], self.game.level.lvl[self.game.level.ln][i][2], self.game.level.lvl[self.game.level.ln][i][3])
+        for i in range(len(self.game.level.kb[self.game.level.ln])):
+            self.kb = pg.Rect(self.game.level.kb[self.game.level.ln][i][0], self.game.level.kb[self.game.level.ln][i][1], self.game.level.kb[self.game.level.ln][i][2], self.game.level.kb[self.game.level.ln][i][3])
             if self.plr.colliderect(self.kb):
                 self.reset()       
                 self.cap = 0
@@ -98,47 +98,56 @@ class Level:
     def __init__(self, game, ln=0):
         self.game = game
         self.ln = ln
-        self.lvl = [
-                            [
-                                [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],
-                                [0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT]
-                            ], 
-                            [
-                                [500,500,50,50]
-                            ],      
-                            [
-                                [300,300,20,20], [240,240,20,20] 
-                            ]
-                        ]
+        self.kb = [
+                        [
+                             [0,0,WIDTH,HEIGHT/14],[0,HEIGHT-HEIGHT/14+1,WIDTH,HEIGHT/14],
+                             [0,0,WIDTH/20,HEIGHT],[WIDTH-WIDTH/20+1,0,WIDTH/20,HEIGHT],
+                             [WIDTH/1.77, HEIGHT/6.92, WIDTH/24.98, HEIGHT/1.17], [WIDTH/3.2, HEIGHT/2.19, WIDTH/1.83, HEIGHT/17.35],
+                             [WIDTH/1.32, 0, WIDTH/4.11, HEIGHT/3.93], [WIDTH/1.39, HEIGHT/1.42, WIDTH/3.56, HEIGHT/17.35],
+                             [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
+                             
+                             
+                        ], 
+                        [
+                            [500,500,50,50]
+                        ],      
+                        [
+                            [300,300,20,20], [240,240,20,20] 
+                         ]
+                  ]
         
         self.sl = [
-                    [WIDTH/2, HEIGHT/2],
+                    [WIDTH/5, HEIGHT/1.3],
                     [WIDTH/1.5, HEIGHT/3],
                     [WIDTH/1.5, HEIGHT/3]
-                    
                   ]
         self.fl = [
-                    [WIDTH/10, HEIGHT/10, WIDTH/11, HEIGHT/11],
+                    [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
                     [100,100,10,10],
                     [0,0,85,80]
                   ]
+        self.dark = [0,0,1]
         for i in range(900):
-            self.lvl.append([[random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)],
+            self.kb.append([[random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)],
                              [random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(10,400),random.randint(10,400)],
                              [random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(50,500),random.randint(50,500)]])
             self.sl.append([random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)])
             self.fl.append([random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)])
+            self.dark.append(random.randint(0,1))
             
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
     def run(self):
-        for i in range(len(self.lvl[self.ln])):
-            self.game.block = Obstacle(self.game, self.lvl[self.ln][i][0], self.lvl[self.ln][i][1], self.lvl[self.ln][i][2], self.lvl[self.ln][i][3])
+        self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
+        self.game.finish.blit()
+        for i in range(len(self.kb[self.ln])):
+            self.game.block = Obstacle(self.game, self.kb[self.ln][i][0], self.kb[self.ln][i][1], self.kb[self.ln][i][2], self.kb[self.ln][i][3])
             self.game.block.blit()
-            self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
-            self.game.finish.blit()
+            
         numfont = pg.font.SysFont('Courier new', 50)
         numtext = numfont.render(str(self.ln),0,(100,100,100))
         self.game.app.sc.blit(numtext,(WIDTH//10,HEIGHT//5-50))
+        if self.dark[self.ln]:
+            self.game.cover.run()
 class Obstacle:
     def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type='kb'):
         self.game = game
@@ -211,8 +220,8 @@ class Game:
         self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125)
         self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
-        self.bool_music_button = Button(self, WIDTH//50, HEIGHT//3+75, WIDTH/20, WIDTH/20, text='•', action='bool_music')
-        
+        self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
+        self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+50, WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
         self.bool = ''
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
         
@@ -221,8 +230,10 @@ class Game:
         self.app.sc.fill((0,0,0))
         pg.draw.rect(self.app.sc,(255,255,255),(0,0,WIDTH,HEIGHT))
         
-    def setup(self):
-        pass
+    def set(self):
+        self.bool = ''
+        time.sleep(0.05)
+        self.app.write_config()
     
     def run(self):
         self.cursor.run()
@@ -233,19 +244,27 @@ class Game:
             self.settings_button.run()  
             self.exit_button.run()
         elif self.tab == 'settings':
-            self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
             self.app.sc.blit(self.font.render('Res: '+str(WIDTH)+'; '+str(HEIGHT),0,(0,0,0)),(WIDTH//10,HEIGHT//2-100))
+            self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
+            self.app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),0,(0,0,0)),(WIDTH//10,HEIGHT//2))
             self.bool_music_button.run()
+            self.bool_fullscreen_button.run()
             self.back_button.run()
             if self.bool == 'music':
-                if self.app.music_state == 0:
-                    self.app.music_state = 1
-                else:
+                if self.app.music_state:
                     self.app.music_state = 0
-                self.bool = ''
-                time.sleep(0.05)
+                else:
+                    self.app.music_state = 1
+                self.set()
+            if self.bool == 'fullscreen':
+                if self.app.fullscreen:
+                    self.app.fullscreen = 0
+                else:
+                    self.app.fullscreen = 1
+                self.app.check_fullscreen()
+                self.set()
+            
         elif self.tab == 'play':
-            self.cover.run()
             self.player.instance()
             self.player.check()
             self.player.check_win()
@@ -263,8 +282,8 @@ class Game:
             if key[pg.K_LEFT]:
                 self.player.plr.left -= 20
                 self.player.plr.top -= 20
-            if key[pg.K_RIGHT]:
-                pass
+            if key[pg.K_ESCAPE]:
+                self.tab = 'menu'
             if key[pg.K_SPACE]:
                 if self.paused == 1:
                     self.paused = 0
@@ -276,17 +295,16 @@ class Game:
                 self.app.sc.blit(self.pause,(WIDTH//3,HEIGHT//2-50))
         else:
             print("This kind of tab does not exist.")
-            self.tab = "menu"
+            self.tab = 'menu'
 
 class App:
     def __init__(self):
         pg.init()
         pg.mixer.init()
-        self.sc = pg.display.set_mode((WIDTH, HEIGHT))
         self.clock = pg.time.Clock()
-        self.game = Game(self)
         self.read_config()
         self.play_music()
+        self.game = Game(self)
         #print(self.config.read(1))
         
     def exit(self):
@@ -295,8 +313,21 @@ class App:
     def read_config(self):
         self.config = open('assets/cfg.txt', 'r')
         self.music_state = int(self.config.read(1))
-        # 0 - music do not play; 1 - music plays
+        self.fullscreen = int(self.config.read(1))
+        self.check_fullscreen()
         self.config.close()
+    def write_config(self):
+        self.config = open('assets/cfg.txt', 'w')
+        self.config.write(str(self.music_state)+str(self.fullscreen))
+        self.config.close()
+        self.config = open('assets/cfg.txt', 'r')
+        print(self.config.read())
+            
+    def check_fullscreen(self):
+        if self.fullscreen:
+            self.sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
+        else:
+            self.sc = pg.display.set_mode((WIDTH, HEIGHT))
     def play_music(self):
         self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
         pg.mixer.music.play(-1)
