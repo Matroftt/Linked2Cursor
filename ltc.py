@@ -74,9 +74,16 @@ class Player:
                
         self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))   
         
-        if self.cap == 1:  
-            self.plr.left = self.mouse_x - 9
-            self.plr.top = self.mouse_y - 9
+        if self.cap == 1:
+            if self.game.app.cap_mode == 0:
+                self.plr.left = self.mouse_x - self.plr.width/2
+                self.plr.top = self.mouse_y - self.plr.height/2
+            elif self.game.app.cap_mode == 1:
+                self.plr.left = self.mouse_x - self.plr.width
+                self.plr.top = self.mouse_y - self.plr.height
+            elif self.game.app.cap_mode == 2:
+                self.plr.left = self.mouse_x
+                self.plr.top = self.mouse_y
         else:
             pass
     def check(self):
@@ -224,6 +231,7 @@ class Game:
         self.cursor = Cursor()
         self.tab = 'menu'
         self.paused = False
+        self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
         self.font = pg.font.SysFont('Courier new', 50)
         self.editor_font = pg.font.SysFont('Courier new', 15)
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
@@ -233,6 +241,8 @@ class Game:
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
         self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+50, WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
+        self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+100, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
+        
         self.bool = ''
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
         
@@ -340,8 +350,13 @@ class Game:
             self.app.sc.blit(self.font.render('Res: '+str(WIDTH)+'; '+str(HEIGHT),0,(0,0,0)),(WIDTH//10,HEIGHT//2-100))
             self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
             self.app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),0,(0,0,0)),(WIDTH//10,HEIGHT//2))
+            
+            self.app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',0,(0,0,0)),(WIDTH//10,HEIGHT//2+50))
+            
             self.bool_music_button.run()
             self.bool_fullscreen_button.run()
+            self.bool_capmode_button.run()
+            
             self.back_button.run()
             if self.bool == 'music':
                 if self.app.music_state:
@@ -355,6 +370,11 @@ class Game:
                 else:
                     self.app.fullscreen = 1
                 self.app.check_fullscreen()
+                self.set()
+            if self.bool == 'cap_mode':
+                self.app.cap_mode += 1
+                if self.app.cap_mode > 2:
+                    self.app.cap_mode = 0
                 self.set()
             
         elif self.tab == 'play':
@@ -403,11 +423,12 @@ class App:
         self.config = open('assets/cfg.txt', 'r')
         self.music_state = int(self.config.read(1))
         self.fullscreen = int(self.config.read(1))
+        self.cap_mode = int(self.config.read(1))
         self.check_fullscreen()
         self.config.close()
     def write_config(self):
         self.config = open('assets/cfg.txt', 'w')
-        self.config.write(str(self.music_state)+str(self.fullscreen))
+        self.config.write(str(self.music_state)+str(self.fullscreen)+str(self.cap_mode))
         self.config.close()
         self.config = open('assets/cfg.txt', 'r')
         print(self.config.read())
