@@ -242,19 +242,31 @@ class Game:
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
         self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+50, WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
         self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+100, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
-        
         self.bool = ''
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
-        
         #Editor
         self.obj_list = self.level.frame
         self.grid_size = 10
-        
+        self.gridlist = []
+        self.left, self.top, self.right, self.bottom = 0, 0, 0, 0 # To prevent crashes
+        self.update_grid()
     def background(self):
         global a, b, c, clr
         self.app.sc.fill((0,0,0))
         pg.draw.rect(self.app.sc,(255,255,255),(0,0,WIDTH,HEIGHT))
-        
+    def update_grid(self):
+        self.gridlist = []
+        self.linex_list = [pg.Rect(0, i*self.grid_size, WIDTH, 1) for i in range(round(WIDTH/self.grid_size)+1)]
+        self.liney_list = [pg.Rect(i*self.grid_size, 0, 1, HEIGHT) for i in range(round(WIDTH/self.grid_size)+1)]
+        for x in range(len(self.linex_list)):
+            self.linex = self.linex_list.pop(len(self.linex_list)-1)
+            self.gridlist.append(self.linex)
+        for y in range(len(self.liney_list)):
+            self.liney = self.liney_list.pop(len(self.liney_list)-1)  
+            self.gridlist.append(self.liney)
+    def draw_grid(self):
+        for k in range(len(self.gridlist)):
+            pg.draw.rect(self.app.sc, (25,25,25), self.gridlist[k])
     def set(self):
         self.bool = ''
         time.sleep(0.05)
@@ -272,7 +284,6 @@ class Game:
             self.exit_button.run()
         elif self.tab == 'editor':
             self.pressed = pg.mouse.get_pressed()
-            
             if self.pressed[0]:
                 self.left, self.top = pg.mouse.get_pos()
                 self.left = round(self.left/self.grid_size)*self.grid_size
@@ -314,29 +325,36 @@ class Game:
                 
             if self.key[pg.K_RIGHT]:
                 self.grid_size += 5
-                time.sleep(0.05)
+                time.sleep(0.1)
+                if self.grid_size == 4:
+                    self.grid_size = 5
+                self.update_grid()
                 
             if self.key[pg.K_LEFT]:
                 self.grid_size -= 5
-                if self.grid_size < 0:
-                    self.grid_size = 0
-                time.sleep(0.05)
+                if self.grid_size == 0:
+                    self.grid_size = -1
+                time.sleep(0.1)
+                self.update_grid()
                 
             if self.key[pg.K_SPACE]:
                 self.obj_list.append([self.left, self.top, self.right-self.left, self.bottom-self.top])
-                time.sleep(0.33)
+                time.sleep(0.2)
             
             if self.key[pg.K_TAB]:
                 self.app.sc.blit(self.player.plr_img,(self.cursor.mouse_x-self.player.plr.width,self.cursor.mouse_y-self.player.plr.height))
             if self.key[pg.K_BACKSPACE]:
-                self.del_obj = self.obj_list.pop(len(self.obj_list)-1)
+                if self.obj_list != []:
+                    self.del_obj = self.obj_list.pop(len(self.obj_list)-1)
+                else:
+                    print('No elements in level editor to delete')
                 time.sleep(0.2)
             
                 
             for i in range(len(self.obj_list)):
                 self.rect = Obstacle(self, self.obj_list[i][0],self.obj_list[i][1],self.obj_list[i][2],self.obj_list[i][3])
                 self.rect.blit()
-            
+            self.draw_grid()
             self.app.sc.blit(self.editor_font.render('Grid:'+str(self.grid_size)+'; K_LEFT K_RIGHT to change the value; K_UP to reset; K_DOWN to print result into console and reset.',0,(150,215,150)),(0,0))
             self.app.sc.blit(self.editor_font.render('TAB to show test player; BACKSPACE to remove last object.',0,(150,215,150)),(0,15))
             self.app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(150,215,150)),(0,HEIGHT-15))
