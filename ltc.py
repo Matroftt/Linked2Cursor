@@ -19,7 +19,7 @@ escape - exit to menu
 
 
 import pygame as pg, random, sys, time
-WIDTH, HEIGHT = 1024,768
+WIDTH, HEIGHT = 1024, 768
 cursor = pg.Rect(0,0,1,1)
 
 class Cover:
@@ -59,10 +59,10 @@ class Player:
         self.game = game
         self.paused = False
         self.cursor = Cursor()
-        self.plr = pg.Rect(0,0,18,18)
+        self.plr = pg.Rect(0,0,WIDTH/51.2,HEIGHT/38.4)
+        self.plr_img = pg.transform.scale(pg.image.load('assets/icon.png'), (self.plr.width, self.plr.height))
         self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
-        self.plr_img = pg.image.load('assets/icon.png')
         
     def instance(self):
         self.cursor.run()
@@ -251,7 +251,6 @@ class Game:
         self.left, self.top, self.right, self.bottom = 0, 0, 0, 0 # To prevent crashes
         self.update_grid()
     def background(self):
-        global a, b, c, clr
         self.app.sc.fill((0,0,0))
         pg.draw.rect(self.app.sc,(255,255,255),(0,0,WIDTH,HEIGHT))
     def update_grid(self):
