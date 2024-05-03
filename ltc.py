@@ -222,9 +222,43 @@ class Button:
             self.game.bool = self.bool_action
         else:
             self.game.tab = self.action
+class Animation():
+    def __init__(self, game):
+        self.game = game
+        self.player = Player(self)
+        self.player.plr.left = WIDTH/1.5
+        self.player.plr.top = -self.player.plr.height
+        self.list = [pg.Rect(random.randint(round(WIDTH/3), round(WIDTH/1.001)), random.randint(0,HEIGHT-50), random.randint(round(WIDTH/64), round(WIDTH/16)), random.randint(round(HEIGHT/64), round(HEIGHT/8))) for i in range(5)]
+    def run(self):
+        pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH/3, 0, WIDTH/64, HEIGHT))
+        pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH-WIDTH/64, 0, WIDTH/64, HEIGHT))
+        for i in range(len(self.list)):
+            self.kb = pg.Rect(self.list[i][0], self.list[i][1], self.list[i][2], self.list[i][3])
+            if self.player.plr.colliderect(self.kb):
+                self.player.plr.top = -self.player.plr.height
+                self.player.plr.left = WIDTH/1.5
+            if self.player.plr.left <= WIDTH/1.5:
+                self.player.plr.left = WIDTH/1.5 + 10
+            elif self.player.plr.left >= WIDTH-WIDTH/64:
+                self.player.plr.left = WIDTH-WIDTH/64 - 10
+        for i in range(5):
+            pg.draw.rect(self.game.app.sc, (0,0,0), self.list[i])
+        self.game.app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
+        for i in range(5):
+            if random.randint(1,5) == 1:
+                self.player.plr.left += 2
+            elif random.randint(1,5) == 1:
+                self.player.plr.left -= 2
+        for i in range(2):
+            self.player.plr.top += 1
+        if self.player.plr.top >= HEIGHT+self.player.plr.height:
+            self.player.plr.top = -15
+            self.player.plr.left = WIDTH/1.5
+            
 class Game:
     def __init__(self, app):
         self.app = app
+        self.menu_animation = Animation(self)
         self.player = Player(self)
         self.level = Level(self)
         self.cover = Cover(self)
@@ -276,6 +310,7 @@ class Game:
         self.cursor.run()
         self.background()
         if self.tab == 'menu':
+            self.menu_animation.run()
             self.play_button.run()
             self.icons_button.run()
             self.editor_button.run()
