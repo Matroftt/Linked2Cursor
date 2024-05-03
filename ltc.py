@@ -429,6 +429,7 @@ class App:
         pg.mixer.init()
         self.clock = pg.time.Clock()
         self.read_config()
+        self.check_music()
         self.play_music()
         self.game = Game(self)
         #print(self.config.read(1))
