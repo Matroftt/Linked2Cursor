@@ -244,16 +244,16 @@ class Animation():
         for i in range(5):
             pg.draw.rect(self.game.app.sc, (0,0,0), self.list[i])
         self.game.app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
-        for i in range(5):
-            if random.randint(1,5) == 1:
-                self.player.plr.left += 2
-            elif random.randint(1,5) == 1:
-                self.player.plr.left -= 2
+        if random.randint(1,125) == 1:
+            self.mov = random.randint(-10,10)
+            for i in range(10):
+                self.player.plr.left += self.mov
+                self.player.plr.top += 1
         for i in range(2):
             self.player.plr.top += 1
         if self.player.plr.top >= HEIGHT+self.player.plr.height:
             self.player.plr.top = -15
-            self.player.plr.left = WIDTH/1.5
+            #self.player.plr.left = WIDTH/1.5
             
 class Game:
     def __init__(self, app):
@@ -278,6 +278,9 @@ class Game:
         self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+100, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
         self.bool = ''
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
+        self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
+        #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
+        
         #Editor
         self.obj_list = self.level.frame
         self.grid_size = 10
@@ -310,6 +313,7 @@ class Game:
         self.cursor.run()
         self.background()
         if self.tab == 'menu':
+            #self.app.sc.blit(self.logo_img,(self.logo.left,self.logo.top))
             self.menu_animation.run()
             self.play_button.run()
             self.icons_button.run()
