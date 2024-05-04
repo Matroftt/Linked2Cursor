@@ -59,8 +59,9 @@ class Player:
         self.game = game
         self.paused = False
         self.cursor = Cursor()
+        self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
         self.plr = pg.Rect(0,0,WIDTH/51.2,HEIGHT/38.4)
-        self.plr_img = pg.transform.scale(pg.image.load('assets/icon.png'), (self.plr.width, self.plr.height))
+        self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
         self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
         
@@ -268,7 +269,7 @@ class Game:
         self.font = pg.font.SysFont('Courier new', round(WIDTH/20.48))
         self.editor_font = pg.font.SysFont('Courier new', round(WIDTH/68.27))
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
-        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125)
+        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125, action='icons')
         self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
         self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
@@ -400,18 +401,17 @@ class Game:
             if self.key[pg.K_ESCAPE]:
                 self.tab = 'menu'
                 
-                
+        elif self.tab == 'icons':
+            self.back_button.run()
         elif self.tab == 'settings':
             self.app.sc.blit(self.font.render('Res: '+str(WIDTH)+'; '+str(HEIGHT),0,(0,0,0)),(WIDTH//10,HEIGHT//2-100))
             self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
             self.app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),0,(0,0,0)),(WIDTH//10,HEIGHT//2))
-            
             self.app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',0,(0,0,0)),(WIDTH//10,HEIGHT//2+50))
             
             self.bool_music_button.run()
             self.bool_fullscreen_button.run()
             self.bool_capmode_button.run()
-            
             self.back_button.run()
             if self.bool == 'music':
                 if self.app.music_state:
