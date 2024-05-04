@@ -18,7 +18,7 @@ escape - exit to menu
 '''
 
 
-import pygame as pg, random, sys, time
+import pygame as pg, random as r, sys, time
 WIDTH, HEIGHT = 1024, 768
 cursor = pg.Rect(0,0,1,1)
 
@@ -67,14 +67,14 @@ class Player:
     def instance(self):
         self.cursor.run()
         if cursor.colliderect(self.plr):
-            if self.game.paused == 0:
-                if self.cap == 0:
+            if not self.game.paused:
+                if not self.cap:
                     self.cap = 1
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
                
         self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))   
         
-        if self.cap == 1:
+        if self.cap:
             if self.game.app.cap_mode == 0:
                 self.plr.left = self.mouse_x - self.plr.width/2
                 self.plr.top = self.mouse_y - self.plr.height/2
@@ -95,10 +95,11 @@ class Player:
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
             print('Level '+str(self.game.level.ln),'Completed')
-            self.reset()
             self.game.level.ln += 1
+            self.reset()
       
     def reset(self):
+        self.cap = 0
         self.plr.left = self.game.level.sl[self.game.level.ln][0]
         self.plr.top = self.game.level.sl[self.game.level.ln][1]
         
@@ -116,31 +117,31 @@ class Level:
                              [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
                         ], 
                         [
-                             self.frame[0], self.frame[1], self.frame[2], self.frame[3], [WIDTH/5.12, HEIGHT/7.68, WIDTH/5.12, HEIGHT/2.56], [WIDTH/2.56, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/3.41, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/5.12, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.05, 0, WIDTH/10.24, HEIGHT/3.84], [WIDTH/1.46, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.28], [WIDTH/1.28, HEIGHT/1.92, WIDTH/5.12, HEIGHT/-7.68], [WIDTH/1.46, HEIGHT/2.56, WIDTH/3.41, HEIGHT/7.68], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, 0], [WIDTH/1.46, HEIGHT/1.92, WIDTH/3.41, HEIGHT/1.92], [WIDTH/5.12, HEIGHT/1.92, WIDTH/10.24, HEIGHT/3.84], [WIDTH/2.56, HEIGHT/1.54, WIDTH/10.24, HEIGHT/2.56], [WIDTH/2.05, HEIGHT/1.54, WIDTH/10.24, HEIGHT/7.68], [0, HEIGHT/1.1, WIDTH/10.24, HEIGHT/-1.28], [0, HEIGHT/7.68, WIDTH/10.24, HEIGHT/1.1]
+                              [0, 0, WIDTH/1.0, HEIGHT/38.4], [0, HEIGHT/38.4, WIDTH/51.5, HEIGHT/1.04], [0, HEIGHT/1.02, WIDTH/1.0, HEIGHT/38.4], [WIDTH/1.02, HEIGHT/38.4, WIDTH/51.5, HEIGHT/1.02], [WIDTH/8.58, HEIGHT/38.4, WIDTH/25.75, HEIGHT/1.48], [WIDTH/51.5, HEIGHT/1.1, WIDTH/2.71, HEIGHT/12.8], [WIDTH/2.86, HEIGHT/4.27, WIDTH/25.75, HEIGHT/1.38], [WIDTH/6.5, HEIGHT/1.54, WIDTH/10.3, HEIGHT/19.2], [WIDTH/3.96, HEIGHT/4.27, WIDTH/10, HEIGHT/19.2], [WIDTH/2.06, 0, WIDTH/25.75, HEIGHT/1.42], [WIDTH/2.71, HEIGHT/1.16, WIDTH/1.61, HEIGHT/7.68], [WIDTH/1.61, HEIGHT/5.49, WIDTH/25.75, HEIGHT/1.42], [WIDTH/4.29, HEIGHT/2.26, WIDTH/25.75, HEIGHT/19.2], [WIDTH/1.32, 0, WIDTH/25.75, HEIGHT/1.37], [WIDTH/1.12, HEIGHT/5.49, WIDTH/10.3, HEIGHT/1.42]
+
                         ],      
                         [
                             [300,300,20,20], [240,240,20,20] 
-                         ]
+                        ]
                   ]
-        
         self.sl = [
                     [WIDTH/5, HEIGHT/1.2],
-                    [WIDTH/1.5, HEIGHT/3],
+                    [WIDTH/20.5, HEIGHT/13.4],
                     [WIDTH/1.5, HEIGHT/3]
                   ]
         self.fl = [
                     [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
-                    [100,100,10,10],
+                    [WIDTH/1.12, HEIGHT/38.4, WIDTH/9.31, HEIGHT/6.45],
                     [0,0,85,80]
                   ]
         self.dark = [0,0,1]
         for i in range(900):
-            self.kb.append([[random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)],
-                             [random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(10,400),random.randint(10,400)],
-                             [random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(50,500),random.randint(50,500)]])
-            self.sl.append([random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)])
-            self.fl.append([random.randint(0,WIDTH),random.randint(0,HEIGHT),random.randint(0,100),random.randint(0,100)])
-            self.dark.append(random.randint(0,1))
+            self.kb.append([[r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)],
+                             [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(10,400),r.randint(10,400)],
+                             [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(50,500),r.randint(50,500)]])
+            self.sl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
+            self.fl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
+            self.dark.append(r.randint(0,1))
             
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
     def run(self):
@@ -150,9 +151,8 @@ class Level:
             self.game.block = Obstacle(self.game, self.kb[self.ln][i][0], self.kb[self.ln][i][1], self.kb[self.ln][i][2], self.kb[self.ln][i][3])
             self.game.block.blit()
             
-        numfont = pg.font.SysFont('Courier new', 50)
-        numtext = numfont.render(str(self.ln),0,(100,100,100))
-        self.game.app.sc.blit(numtext,(WIDTH//10,HEIGHT//5-50))
+        self.ln_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Level: '+str(self.ln),1,(100,255,100))
+        self.game.app.sc.blit(self.ln_text,(0,0))
         if self.dark[self.ln]:
             self.game.cover.run()
 class Obstacle:
@@ -171,7 +171,8 @@ class Button:
     def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text='Button', clr=(100,100,100), hclr=(150,150,150), pclr=(25,25,25), lo=0, to=0, action=None):
         self.game = game
         self.shadow = shadow
-        self.font = pg.font.SysFont('Courier new', 40)  
+        self.shadow_rect = pg.Rect(l+2,t+2,w,h)
+        self.font = pg.font.SysFont('Courier new', round(WIDTH/25.6))  
         self.text = self.font.render(text,1,(0,0,0))
         self.clr = clr
         self.bclr = clr
@@ -186,13 +187,11 @@ class Button:
         self.to = to
         self.action = action
         self.press = 0
-        if self.shadow == 1:
-            self.shadow_rect = pg.Rect(l+2,t+2,w,h)
     def run(self):
         self.blit()
         self.check()
     def blit(self):
-        if self.shadow == 1:
+        if self.shadow:
             pg.draw.rect(self.game.app.sc, (0,0,0), self.shadow_rect)
         pg.draw.rect(self.game.app.sc, self.clr, self.rect)
         self.game.app.sc.blit(self.text,(self.l+self.w/6-self.lo, self.t+self.h/10-self.to))
@@ -203,7 +202,7 @@ class Button:
             if self.pressed[0]:
                 self.press = 1
                 self.clr = self.pclr
-            elif not self.pressed[0] and self.press == 1:
+            elif not self.pressed[0] and self.press:
                 self.press = 0
                 self.actions()
                 self.clr = self.bclr
@@ -228,7 +227,7 @@ class Animation():
         self.player = Player(self)
         self.player.plr.left = WIDTH/1.5
         self.player.plr.top = -self.player.plr.height
-        self.list = [pg.Rect(random.randint(round(WIDTH/3), round(WIDTH/1.001)), random.randint(0,HEIGHT-50), random.randint(round(WIDTH/64), round(WIDTH/16)), random.randint(round(HEIGHT/64), round(HEIGHT/8))) for i in range(5)]
+        self.list = [pg.Rect(r.randint(round(WIDTH/3), round(WIDTH/1.001)), r.randint(0,HEIGHT-50), r.randint(round(WIDTH/64), round(WIDTH/16)), r.randint(round(HEIGHT/64), round(HEIGHT/8))) for i in range(5)]
     def run(self):
         pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH/3, 0, WIDTH/64, HEIGHT))
         pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH-WIDTH/64, 0, WIDTH/64, HEIGHT))
@@ -244,8 +243,8 @@ class Animation():
         for i in range(5):
             pg.draw.rect(self.game.app.sc, (0,0,0), self.list[i])
         self.game.app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
-        if random.randint(1,125) == 1:
-            self.mov = random.randint(-10,10)
+        if r.randint(1,125) == 1:
+            self.mov = r.randint(-10,10)
             for i in range(10):
                 self.player.plr.left += self.mov
                 self.player.plr.top += 1
@@ -266,8 +265,8 @@ class Game:
         self.tab = 'menu'
         self.paused = False
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
-        self.font = pg.font.SysFont('Courier new', 50)
-        self.editor_font = pg.font.SysFont('Courier new', 15)
+        self.font = pg.font.SysFont('Courier new', round(WIDTH/20.48))
+        self.editor_font = pg.font.SysFont('Courier new', round(WIDTH/68.27))
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
         self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125)
         self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
@@ -340,19 +339,19 @@ class Game:
             if self.key[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
-                        self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],2))
+                        self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],3))
                     else:
                         self.obj_list[i][0] = 0
                     if self.obj_list[i][1] != 0:
-                        self.obj_list[i][1] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][1],2))
+                        self.obj_list[i][1] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][1],3))
                     else:
                         self.obj_list[i][1] = 0
                     if self.obj_list[i][2] != 0:
-                        self.obj_list[i][2] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][2],2))
+                        self.obj_list[i][2] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][2],3))
                     else:
                         self.obj_list[i][2] = 0
                     if self.obj_list[i][3] != 0:
-                        self.obj_list[i][3] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][3],2))
+                        self.obj_list[i][3] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][3],3))
                     else:
                         self.obj_list[i][3] = 0
                              
@@ -450,12 +449,12 @@ class Game:
             if self.key[pg.K_ESCAPE]:
                 self.tab = 'menu'
             if self.key[pg.K_SPACE]:
-                if self.paused == 1:
+                if self.paused:
                     self.paused = 0
                 else:
                     self.paused = 1
                 time.sleep(0.1)
-            if self.paused == 1:
+            if self.paused:
                 self.pause = self.font.render('-- PAUSE --',0,(255,255,255))
                 self.app.sc.blit(self.pause,(WIDTH//3,HEIGHT//2-50))
         else:
@@ -507,7 +506,7 @@ class App:
     def check_music(self):
         if self.music_state:
             pg.mixer.music.unpause()
-        elif self.music_state == 0:
+        elif not self.music_state:
             pg.mixer.music.pause()
     def run(self):
         while True:
