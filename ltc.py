@@ -25,8 +25,8 @@ cursor = pg.Rect(0,0,1,1)
 class Cover:
     def __init__(self, game):
         self.game = game
-        self.cover_img = pg.image.load('assets/cover.png')
-        self.cover = pg.Rect(500, 500, 200, 200)
+        self.cover = pg.Rect(500, 500, WIDTH/3.413, WIDTH/3.413)
+        self.cover_img = pg.transform.scale(pg.image.load('assets/cover.png'), (self.cover.width, self.cover.height))
     def run(self):
         self.blit()
         self.cover.centerx = self.game.player.plr.left + self.game.player.plr.width/2
@@ -135,7 +135,7 @@ class Level:
                     [WIDTH/1.12, HEIGHT/38.4, WIDTH/9.31, HEIGHT/6.45],
                     [0,0,85,80]
                   ]
-        self.dark = [0,0,1]
+        self.dark = [1.1,1]
         for i in range(900):
             self.kb.append([[r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)],
                              [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(10,400),r.randint(10,400)],
