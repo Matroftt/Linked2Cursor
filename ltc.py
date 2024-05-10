@@ -15,11 +15,11 @@ arrow up - previous level
 arrow down - next level
 arrow left - moves character up and left
 escape - exit to menu
+backspace - reset resolution to 640, 480
 '''
 
 
 import pygame as pg, random as r, sys, time
-WIDTH, HEIGHT = 1024, 768
 cursor = pg.Rect(0,0,1,1)
 
 class Cover:
@@ -62,10 +62,15 @@ class Player:
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
         self.plr = pg.Rect(0,0,WIDTH/51.2,HEIGHT/38.4)
         self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
+        self.trails = []
+        self.trail_count = 3
+        for i in range(self.trail_count):
+            self.trails.append([0,0])
         self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
         
     def instance(self):
+        self.trail()
         self.cursor.run()
         if cursor.colliderect(self.plr):
             if not self.game.paused:
@@ -103,7 +108,14 @@ class Player:
         self.cap = 0
         self.plr.left = self.game.level.sl[self.game.level.ln][0]
         self.plr.top = self.game.level.sl[self.game.level.ln][1]
-        
+    def trail(self):
+        if self.trails[0][0] == self.plr.left and self.trails[0][1] == self.plr.top:
+            pass
+        else:
+            for i in range(self.trail_count):
+                self.game.app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
+        self.trails.insert(0, [self.plr.left, self.plr.top])
+        self.trails.pop(self.trail_count-1)        
 class Level:
     def __init__(self, game, ln=0):
         self.game = game
@@ -122,7 +134,7 @@ class Level:
 
                         ],      
                         [
-                            [300,300,20,20], [240,240,20,20] 
+                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/1.0334, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/3.6571, HEIGHT/4.0421, WIDTH/20.48, HEIGHT/6.9818], [WIDTH/3.4133, HEIGHT/4.0421, WIDTH/11.3778, HEIGHT/19.2], [WIDTH/3.2, HEIGHT/2.8444, WIDTH/17.0667, HEIGHT/25.6], [WIDTH/2.9257, HEIGHT/2.6483, WIDTH/51.2, HEIGHT/10.9714], [WIDTH/2.8444, HEIGHT/2.2588, WIDTH/9.3091, HEIGHT/38.4], [WIDTH/2.3814, HEIGHT/3.2, WIDTH/25.6, HEIGHT/6.9818], [WIDTH/3.4133, HEIGHT/5.9077, WIDTH/14.6286, HEIGHT/9.6], [WIDTH/5.6889, HEIGHT/4.8, WIDTH/10.24, HEIGHT/6.4], [WIDTH/4.8762, HEIGHT/2.9538, WIDTH/11.3778, HEIGHT/5.4857], [WIDTH/3.7926, HEIGHT/1.9692, WIDTH/8.5333, HEIGHT/5.9077], [WIDTH/2.2261, HEIGHT/2.3273, WIDTH/7.8769, HEIGHT/6.4]
                         ]
                   ]
         self.sl = [
@@ -135,7 +147,7 @@ class Level:
                     [WIDTH/1.12, HEIGHT/38.4, WIDTH/9.31, HEIGHT/6.45],
                     [0,0,85,80]
                   ]
-        self.dark = [1.1,1]
+        self.dark = [0,0,0]
         for i in range(900):
             self.kb.append([[r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)],
                              [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(10,400),r.randint(10,400)],
@@ -220,6 +232,9 @@ class Button:
         elif list(self.action)[0] == 'b' and list(self.action)[3] == 'l' and list(self.action)[4] == '_':
             self.bool_action = str(self.action.split('bool_')[1])
             self.game.bool = self.bool_action
+        elif list(self.action)[0] == 'a' and list(self.action)[4] == 'y' and list(self.action)[5] == '_':
+            self.apply_action = str(self.action.split('apply_')[1])
+            self.game.apply = self.apply_action
         else:
             self.game.tab = self.action
 class Animation():
@@ -266,6 +281,14 @@ class Game:
         self.tab = 'menu'
         self.paused = False
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
+        self.resolution = 0
+        self.resolutions_list = [[300, 200], [400, 300], [640, 480], [800, 600], [1024, 768]]
+        for i in range(len(self.resolutions_list)):
+            if [WIDTH, HEIGHT] == self.resolutions_list[i]:
+                self.resolution = i
+                break
+        self.prev_resolution = self.resolution
+        
         self.font = pg.font.SysFont('Courier new', round(WIDTH/20.48))
         self.editor_font = pg.font.SysFont('Courier new', round(WIDTH/68.27))
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
@@ -273,9 +296,14 @@ class Game:
         self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
         self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
+        self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=WIDTH/60, to=4, text='Apply', action='apply_resolution')
+        self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='bool_resolution')
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
-        self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+50, WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
-        self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+100, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
+        self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
+        self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36)*2, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
+        self.set_w, self.set_h = WIDTH, HEIGHT
+        
+        self.apply = ''
         self.bool = ''
         self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
         self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
@@ -309,6 +337,7 @@ class Game:
         self.app.write_config()
     
     def run(self):
+        global WIDTH, HEIGHT
         self.key = pg.key.get_pressed()
         self.cursor.run()
         self.background()
@@ -320,6 +349,16 @@ class Game:
             self.editor_button.run()
             self.settings_button.run()  
             self.exit_button.run()
+            if self.key[pg.K_BACKSPACE]:
+                WIDTH, HEIGHT = 1024, 768
+                self.app.write_config()
+                self.app.set_resolution()
+            if self.resolution != self.prev_resolution:
+                self.prev_resolution = self.resolution
+            else:
+                self.set_w, self.set_h = WIDTH, HEIGHT
+                self.resolution = self.prev_resolution
+            
         elif self.tab == 'editor':
             self.pressed = pg.mouse.get_pressed()
             if self.pressed[0]:
@@ -340,19 +379,19 @@ class Game:
             if self.key[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
-                        self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],3))
+                        self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],4))
                     else:
                         self.obj_list[i][0] = 0
                     if self.obj_list[i][1] != 0:
-                        self.obj_list[i][1] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][1],3))
+                        self.obj_list[i][1] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][1],4))
                     else:
                         self.obj_list[i][1] = 0
                     if self.obj_list[i][2] != 0:
-                        self.obj_list[i][2] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][2],3))
+                        self.obj_list[i][2] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][2],4))
                     else:
                         self.obj_list[i][2] = 0
                     if self.obj_list[i][3] != 0:
-                        self.obj_list[i][3] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][3],3))
+                        self.obj_list[i][3] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][3],4))
                     else:
                         self.obj_list[i][3] = 0
                              
@@ -404,15 +443,19 @@ class Game:
         elif self.tab == 'icons':
             self.back_button.run()
         elif self.tab == 'settings':
-            self.app.sc.blit(self.font.render('Res: '+str(WIDTH)+'; '+str(HEIGHT),0,(0,0,0)),(WIDTH//10,HEIGHT//2-100))
-            self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),0,(0,0,0)),(WIDTH//10,HEIGHT//2-50))
-            self.app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),0,(0,0,0)),(WIDTH//10,HEIGHT//2))
-            self.app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',0,(0,0,0)),(WIDTH//10,HEIGHT//2+50))
+            self.app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)*2))
+            self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)))
+            self.app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(WIDTH//10,HEIGHT//2))
+            self.app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(WIDTH//10,HEIGHT//2+(HEIGHT/15.36)))
+            
+            self.bool_resolution_button.run()
+            self.apply_resolution_button.run()
             
             self.bool_music_button.run()
             self.bool_fullscreen_button.run()
             self.bool_capmode_button.run()
             self.back_button.run()
+            
             if self.bool == 'music':
                 if self.app.music_state:
                     self.app.music_state = 0
@@ -430,6 +473,16 @@ class Game:
                 self.app.cap_mode += 1
                 if self.app.cap_mode > 2:
                     self.app.cap_mode = 0
+                self.set()
+            if self.bool == 'resolution':
+                self.set_w, self.set_h = self.resolutions_list[self.resolution-1][0], self.resolutions_list[self.resolution-1][1]
+                self.resolution -= 1
+                if self.resolution < 0:
+                    self.resolution = len(self.resolutions_list)-1
+                self.bool = '' #self.set()
+            if self.apply == 'resolution':
+                WIDTH, HEIGHT = self.set_w, self.set_h
+                self.app.set_resolution()
                 self.set()
             
         elif self.tab == 'play':
@@ -476,24 +529,30 @@ class App:
         pg.quit()
         sys.exit()
     def read_config(self):
+        global WIDTH, HEIGHT
         self.config = open('assets/cfg.txt', 'r')
-        self.music_state = int(self.config.read(1))
-        self.fullscreen = int(self.config.read(1))
-        self.cap_mode = int(self.config.read(1))
+        WIDTH, HEIGHT = int(self.config.readline()), int(self.config.readline())
+        self.music_state = int(self.config.readline())
+        self.fullscreen = int(self.config.readline())
+        self.cap_mode = int(self.config.readline())
         self.check_fullscreen()
         self.config.close()
     def write_config(self):
         self.config = open('assets/cfg.txt', 'w')
-        self.config.write(str(self.music_state)+str(self.fullscreen)+str(self.cap_mode))
+        self.config.write(str(WIDTH)+'\n'+str(HEIGHT)+'\n'+str(self.music_state)+'\n'+str(self.fullscreen)+'\n'+str(self.cap_mode))
         self.config.close()
         self.config = open('assets/cfg.txt', 'r')
         print(self.config.read())
-            
-    def check_fullscreen(self):
+    def set_resolution(self):
+        self.sc = pg.display.set_mode((WIDTH, HEIGHT))
         if self.fullscreen:
             self.sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
-        else:
-            self.sc = pg.display.set_mode((WIDTH, HEIGHT))
+        self.game = Game(self)
+    def check_fullscreen(self):
+        self.sc = pg.display.set_mode((WIDTH, HEIGHT))
+        if self.fullscreen:
+            self.sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
+            
     def play_music(self):
         self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
         pg.mixer.music.play(-1)
@@ -510,7 +569,6 @@ class App:
             pg.mixer.music.pause()
     def run(self):
         while True:
-            
             self.game.run()
             self.check_events()
             self.check_music()
