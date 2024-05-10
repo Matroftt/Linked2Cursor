@@ -33,11 +33,11 @@ class Cover:
         self.cover.centery = self.game.player.plr.top + self.game.player.plr.height/2
         
     def blit(self):
+        self.game.app.sc.blit(self.cover_img,(self.cover.left,self.cover.top))
         self.rect1 = pg.Rect(0,self.cover.top-HEIGHT,WIDTH,HEIGHT)
         self.rect2 = pg.Rect(0,self.cover.bottom,WIDTH,HEIGHT)
         self.rect3 = pg.Rect(self.cover.right,0,WIDTH,HEIGHT)
         self.rect4 = pg.Rect(self.cover.left-WIDTH,0,WIDTH,HEIGHT)
-        self.game.app.sc.blit(self.cover_img,(self.cover.left,self.cover.top))
         pg.draw.rect(self.game.app.sc, (0,0,0), self.rect1)
         pg.draw.rect(self.game.app.sc, (0,0,0), self.rect2)
         pg.draw.rect(self.game.app.sc, (0,0,0), self.rect3)
@@ -53,7 +53,9 @@ class Cursor:
     def run(self):
         self.mouse_x, self.mouse_y = pg.mouse.get_pos()
         cursor.left = self.mouse_x
-        cursor.top = self.mouse_y 
+        cursor.top = self.mouse_y
+        
+        
 class Player:
     def __init__(self, game, cap=0):
         self.game = game
@@ -65,7 +67,7 @@ class Player:
         self.trails = []
         self.trail_count = 3
         for i in range(self.trail_count):
-            self.trails.append([0,0])
+            self.trails.append([-100, -100])
         self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
         
@@ -109,13 +111,18 @@ class Player:
         self.plr.left = self.game.level.sl[self.game.level.ln][0]
         self.plr.top = self.game.level.sl[self.game.level.ln][1]
     def trail(self):
+        for i in range(self.trail_count):
+            self.game.app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
+            
         if self.trails[0][0] == self.plr.left and self.trails[0][1] == self.plr.top:
-            pass
+            self.trails.insert(0, [WIDTH*2, HEIGHT*2])
+            self.trails.pop(self.trail_count-1)
         else:
-            for i in range(self.trail_count):
-                self.game.app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
-        self.trails.insert(0, [self.plr.left, self.plr.top])
-        self.trails.pop(self.trail_count-1)        
+            self.trails.insert(0, [self.plr.left, self.plr.top])
+            self.trails.pop(self.trail_count-1)
+        
+        
+        
 class Level:
     def __init__(self, game, ln=0):
         self.game = game
@@ -157,6 +164,16 @@ class Level:
             self.dark.append(r.randint(0,1))
             
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
+    def run_info(self, debug=0):
+        self.ln_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Level: '+str(self.ln),1,(100,255,100))
+        self.trail_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Trail count: '+str(self.game.player.trail_count),1,(100,255,100))
+        self.cap_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Cap: '+str(self.game.player.cap),1,(100,255,100))
+        
+        
+        self.game.app.sc.blit(self.ln_text,(0,0))
+        if debug:
+            self.game.app.sc.blit(self.trail_text,(0,(WIDTH/85.33)*1))
+            self.game.app.sc.blit(self.cap_text,(0,(WIDTH/85.33)*2))
     def run(self):
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
         self.game.finish.blit()
@@ -164,10 +181,10 @@ class Level:
             self.game.block = Obstacle(self.game, self.kb[self.ln][i][0], self.kb[self.ln][i][1], self.kb[self.ln][i][2], self.kb[self.ln][i][3])
             self.game.block.blit()
             
-        self.ln_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Level: '+str(self.ln),1,(100,255,100))
-        self.game.app.sc.blit(self.ln_text,(0,0))
+        
         if self.dark[self.ln]:
             self.game.cover.run()
+        self.run_info(self.game.debug)
 class Obstacle:
     def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type='kb'):
         self.game = game
@@ -288,28 +305,35 @@ class Game:
                 self.resolution = i
                 break
         self.prev_resolution = self.resolution
+        self.debug = 1
         
         self.font = pg.font.SysFont('Courier new', round(WIDTH/20.48))
         self.editor_font = pg.font.SysFont('Courier new', round(WIDTH/68.27))
+        
+        
+        # Main Menu
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
         self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125, action='icons')
         self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
         self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
+        self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
+        #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
+        
+        # Settings
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
         self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=WIDTH/60, to=4, text='Apply', action='apply_resolution')
         self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='bool_resolution')
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
         self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
         self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36)*2, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
-        self.set_w, self.set_h = WIDTH, HEIGHT
-        
         self.apply = ''
         self.bool = ''
-        self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
-        self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
-        #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
         
-        #Editor
+        self.set_w, self.set_h = WIDTH, HEIGHT
+        
+        self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
+        
+        # Editor
         self.obj_list = self.level.frame
         self.grid_size = 10
         self.gridlist = []
