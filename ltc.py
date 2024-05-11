@@ -246,12 +246,8 @@ class Button:
             self.game.app.exit()
         elif self.action == None:
             print('No action set for this button!', self.rect)
-        elif list(self.action)[0] == 'b' and list(self.action)[3] == 'l' and list(self.action)[4] == '_':
-            self.bool_action = str(self.action.split('bool_')[1])
-            self.game.bool = self.bool_action
-        elif list(self.action)[0] == 'a' and list(self.action)[4] == 'y' and list(self.action)[5] == '_':
-            self.apply_action = str(self.action.split('apply_')[1])
-            self.game.apply = self.apply_action
+        elif list(self.action)[0] == 'a' and list(self.action)[1] == 'c' and list(self.action)[6] == '_':
+            self.game.action = str(self.action.split('action_')[1])
         else:
             self.game.tab = self.action
 class Animation():
@@ -321,13 +317,12 @@ class Game:
         
         # Settings
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
-        self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=WIDTH/60, to=4, text='Apply', action='apply_resolution')
-        self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='bool_resolution')
-        self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='bool_music')
-        self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='bool_fullscreen')
-        self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36)*2, WIDTH/25, WIDTH/25, text='•', action='bool_cap_mode')
-        self.apply = ''
-        self.bool = ''
+        self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=WIDTH/60, to=4, text='Apply', action='action_apply_resolution')
+        self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_change_resolution')
+        self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='action_music')
+        self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_fullscreen')
+        self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36)*2, WIDTH/25, WIDTH/25, text='•', action='action_cap_mode')
+        self.action = ''
         
         self.set_w, self.set_h = WIDTH, HEIGHT
         
@@ -356,7 +351,7 @@ class Game:
         for k in range(len(self.gridlist)):
             pg.draw.rect(self.app.sc, (25,25,25), self.gridlist[k])
     def set(self):
-        self.bool = ''
+        self.action = ''
         time.sleep(0.05)
         self.app.write_config()
     
@@ -374,7 +369,7 @@ class Game:
             self.settings_button.run()  
             self.exit_button.run()
             if self.key[pg.K_BACKSPACE]:
-                WIDTH, HEIGHT = 1024, 768
+                WIDTH, HEIGHT = 640, 480
                 self.app.write_config()
                 self.app.set_resolution()
             if self.resolution != self.prev_resolution:
@@ -480,31 +475,31 @@ class Game:
             self.bool_capmode_button.run()
             self.back_button.run()
             
-            if self.bool == 'music':
+            if self.action == 'music':
                 if self.app.music_state:
                     self.app.music_state = 0
                 else:
                     self.app.music_state = 1
                 self.set()
-            if self.bool == 'fullscreen':
+            if self.action == 'fullscreen':
                 if self.app.fullscreen:
                     self.app.fullscreen = 0
                 else:
                     self.app.fullscreen = 1
                 self.app.check_fullscreen()
                 self.set()
-            if self.bool == 'cap_mode':
+            if self.action == 'cap_mode':
                 self.app.cap_mode += 1
                 if self.app.cap_mode > 2:
                     self.app.cap_mode = 0
                 self.set()
-            if self.bool == 'resolution':
+            if self.action == 'change_resolution':
                 self.set_w, self.set_h = self.resolutions_list[self.resolution-1][0], self.resolutions_list[self.resolution-1][1]
                 self.resolution -= 1
                 if self.resolution < 0:
                     self.resolution = len(self.resolutions_list)-1
-                self.bool = '' #self.set()
-            if self.apply == 'resolution':
+                self.action = '' #self.set()
+            if self.action == 'apply_resolution':
                 WIDTH, HEIGHT = self.set_w, self.set_h
                 self.app.set_resolution()
                 self.set()
@@ -547,7 +542,6 @@ class App:
         self.check_music()
         self.play_music()
         self.game = Game(self)
-        #print(self.config.read(1))
         
     def exit(self):
         pg.quit()
@@ -568,9 +562,7 @@ class App:
         self.config = open('assets/cfg.txt', 'r')
         print(self.config.read())
     def set_resolution(self):
-        self.sc = pg.display.set_mode((WIDTH, HEIGHT))
-        if self.fullscreen:
-            self.sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
+        self.check_fullscreen()
         self.game = Game(self)
     def check_fullscreen(self):
         self.sc = pg.display.set_mode((WIDTH, HEIGHT))
