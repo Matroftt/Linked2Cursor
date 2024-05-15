@@ -100,6 +100,12 @@ class Player:
             if self.plr.colliderect(self.kb):
                 self.reset()       
                 self.cap = 0
+    def check_key(self):
+        for i in range(len(self.game.level.keys[self.game.level.ln])):
+            self.key = pg.Rect(self.game.level.keys[self.game.level.ln][i][0], self.game.level.keys[self.game.level.ln][i][1], self.game.level.key.key.width, self.game.level.key.key.height)
+            if self.plr.colliderect(self.key):
+                self.game.level.keys[self.game.level.ln][i] = [WIDTH, HEIGHT, 0, 0]
+                #create new list for linked blocks
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
             print('Level '+str(self.game.level.ln),'Completed')
@@ -154,6 +160,14 @@ class Level:
                     [WIDTH/1.12, HEIGHT/38.4, WIDTH/9.31, HEIGHT/6.45],
                     [0,0,85,80]
                   ]
+        self.key = Active(self, type='key', l=500, t=500)
+        self.keys = [
+                        [
+                            [self.key.key.left, self.key.key.top, self.key.key.width, self.key.key.height],
+                            [200, self.key.key.top, self.key.key.width, self.key.key.height],
+                            
+                        ]
+                    ]
         self.dark = [0,0,0]
         for i in range(900):
             self.kb.append([[r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)],
@@ -161,6 +175,7 @@ class Level:
                              [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(50,500),r.randint(50,500)]])
             self.sl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
             self.fl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
+            self.keys.append([[WIDTH, HEIGHT, 0, 0]])
             self.dark.append(r.randint(0,1))
             
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
@@ -180,11 +195,27 @@ class Level:
         for i in range(len(self.kb[self.ln])):
             self.game.block = Obstacle(self.game, self.kb[self.ln][i][0], self.kb[self.ln][i][1], self.kb[self.ln][i][2], self.kb[self.ln][i][3])
             self.game.block.blit()
+        for i in range(len(self.keys[self.ln])):
+            self.game.key = Active(self.game, l=self.keys[self.ln][i][0], t=self.keys[self.ln][i][1], type='key')
+            self.game.key.blit()
             
-        
         if self.dark[self.ln]:
             self.game.cover.run()
         self.run_info(self.game.debug)
+        
+class Active:
+    def __init__(self, level, type='', l=0, t=0, linked=''):
+        self.level = level
+        self.type = type
+        
+        self.key = pg.Rect(l,t,40,19)
+        self.key_img = pg.transform.scale(pg.image.load('assets/key.png'), (self.key.width, self.key.height))
+        if self.type == 'key':
+            pass
+        
+    def blit(self):
+        self.level.app.sc.blit(self.key_img,(self.key.left,self.key.top))
+            
 class Obstacle:
     def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type='kb'):
         self.game = game
@@ -252,10 +283,12 @@ class Button:
             self.game.tab = self.action
 class Animation():
     def __init__(self, game):
+        self.key = Active(self, 'key')
         self.game = game
         self.player = Player(self)
         self.player.plr.left = WIDTH/1.5
         self.player.plr.top = -self.player.plr.height
+        self.direction = 'none'
         self.list = [pg.Rect(r.randint(round(WIDTH/3), round(WIDTH/1.001)), r.randint(0,HEIGHT-50), r.randint(round(WIDTH/64), round(WIDTH/16)), r.randint(round(HEIGHT/64), round(HEIGHT/8))) for i in range(5)]
     def run(self):
         pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH/3, 0, WIDTH/64, HEIGHT))
@@ -271,17 +304,26 @@ class Animation():
                 self.player.plr.left = WIDTH-WIDTH/64 - 10
         for i in range(5):
             pg.draw.rect(self.game.app.sc, (0,0,0), self.list[i])
-        self.game.app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
-        if r.randint(1,125) == 1:
-            self.mov = r.randint(-10,10)
-            for i in range(10):
-                self.player.plr.left += self.mov
-                self.player.plr.top += 1
-        for i in range(2):
-            self.player.plr.top += 1
+        
+        if r.randint(1, 150) == 1:
+            self.direction = 'left'
+        if r.randint(1, 150) == 2:
+            self.direction = 'right'
+            
+        if self.direction == 'left':
+            self.player.plr.left -= 2
+            if r.randint(1, 30) == 1:
+                self.direction = 'none'
+        if self.direction == 'right':
+            self.player.plr.left += 2
+            if r.randint(1, 30) == 1:
+                self.direction = 'none'
+        self.player.plr.top += 2
         if self.player.plr.top >= HEIGHT+self.player.plr.height:
-            self.player.plr.top = -15
+            self.player.plr.top = -self.player.plr.height
             #self.player.plr.left = WIDTH/1.5
+        
+        self.game.app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
             
 class Game:
     def __init__(self, app):
@@ -357,7 +399,7 @@ class Game:
     
     def run(self):
         global WIDTH, HEIGHT
-        self.key = pg.key.get_pressed()
+        self.input = pg.key.get_pressed()
         self.cursor.run()
         self.background()
         if self.tab == 'menu':
@@ -368,7 +410,7 @@ class Game:
             self.editor_button.run()
             self.settings_button.run()  
             self.exit_button.run()
-            if self.key[pg.K_BACKSPACE]:
+            if self.input[pg.K_BACKSPACE]:
                 WIDTH, HEIGHT = 640, 480
                 self.app.write_config()
                 self.app.set_resolution()
@@ -392,10 +434,10 @@ class Game:
                 self.bottom = round(self.bottom/self.grid_size)*self.grid_size
                 print(self.right, self.bottom)
                 
-            if self.key[pg.K_UP]:
+            if self.input[pg.K_UP]:
                 self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
                                 [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
-            if self.key[pg.K_DOWN]:
+            if self.input[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
                         self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],4))
@@ -419,25 +461,25 @@ class Game:
                                  [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
                 time.sleep(0.33)
                 
-            if self.key[pg.K_RIGHT]:
+            if self.input[pg.K_RIGHT]:
                 self.grid_size += 5
                 time.sleep(0.1)
                 if self.grid_size == 4:
                     self.grid_size = 5
                 self.update_grid()
                 
-            if self.key[pg.K_LEFT]:
+            if self.input[pg.K_LEFT]:
                 self.grid_size -= 5
                 if self.grid_size == 0:
                     self.grid_size = -1
                 time.sleep(0.1)
                 self.update_grid()
                 
-            if self.key[pg.K_SPACE]:
+            if self.input[pg.K_SPACE]:
                 self.obj_list.append([self.left, self.top, self.right-self.left, self.bottom-self.top])
                 time.sleep(0.2)
             
-            if self.key[pg.K_TAB]:
+            if self.input[pg.K_TAB]:
                 self.app.sc.blit(self.player.plr_img,(self.cursor.mouse_x-self.player.plr.width,self.cursor.mouse_y-self.player.plr.height))
             if self.key[pg.K_BACKSPACE]:
                 if self.obj_list != []:
@@ -456,7 +498,7 @@ class Game:
             self.app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(150,215,150)),(0,HEIGHT-15))
             
                 
-            if self.key[pg.K_ESCAPE]:
+            if self.input[pg.K_ESCAPE]:
                 self.tab = 'menu'
                 
         elif self.tab == 'icons':
@@ -508,19 +550,20 @@ class Game:
             self.player.instance()
             self.player.check()
             self.player.check_win()
+            self.player.check_key()
             self.level.run()
-            if self.key[pg.K_UP]:
+            if self.input[pg.K_UP]:
                 self.level.ln -= 1
                 time.sleep(0.15)
-            if self.key[pg.K_DOWN]:
+            if self.input[pg.K_DOWN]:
                 self.level.ln += 1
                 time.sleep(0.15)
-            if self.key[pg.K_LEFT]:
+            if self.input[pg.K_LEFT]:
                 self.player.plr.left -= 20
                 self.player.plr.top -= 20
-            if self.key[pg.K_ESCAPE]:
+            if self.input[pg.K_ESCAPE]:
                 self.tab = 'menu'
-            if self.key[pg.K_SPACE]:
+            if self.input[pg.K_SPACE]:
                 if self.paused:
                     self.paused = 0
                 else:
