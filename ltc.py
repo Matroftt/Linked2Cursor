@@ -101,11 +101,22 @@ class Player:
                 self.reset()       
                 self.cap = 0
     def check_key(self):
+        # Check for the keys
         for i in range(len(self.game.level.keys[self.game.level.ln])):
             self.key = pg.Rect(self.game.level.keys[self.game.level.ln][i][0], self.game.level.keys[self.game.level.ln][i][1], self.game.level.key.key.width, self.game.level.key.key.height)
             if self.plr.colliderect(self.key):
                 self.game.level.keys[self.game.level.ln][i] = [WIDTH, HEIGHT, 0, 0]
-                #create new list for linked blocks
+                for j in range(len(self.game.level.key_kb[self.game.level.ln][i])):
+                    self.game.level.key_kb[self.game.level.ln][i][j] = None
+                print(self.game.level.key_kb)
+        # Check for the assigned kb's to keys
+        for key in range(len(self.game.level.key_kb[self.game.level.ln])):
+            for j in range(len(self.game.level.key_kb[self.game.level.ln][key])):
+                if self.game.level.key_kb[self.game.level.ln][key][j] != None:
+                    self.kb = pg.Rect(self.game.level.key_kb[self.game.level.ln][key][j][0][0], self.game.level.key_kb[self.game.level.ln][key][j][0][1], self.game.level.key_kb[self.game.level.ln][key][j][0][2], self.game.level.key_kb[self.game.level.ln][key][j][0][3])
+                    if self.plr.colliderect(self.kb):
+                        self.reset()       
+                        self.cap = 0
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
             print('Level '+str(self.game.level.ln),'Completed')
@@ -161,24 +172,81 @@ class Level:
                     [0,0,85,80]
                   ]
         self.key = Active(self, type='key', l=500, t=500)
-        self.keys = [
-                        [
-                            [self.key.key.left, self.key.key.top, self.key.key.width, self.key.key.height],
+        self.keys = [ # List
+                        [ # Level
+                            [WIDTH/2, HEIGHT/2, self.key.key.width, self.key.key.height], # Keys
                             [200, self.key.key.top, self.key.key.width, self.key.key.height],
-                            
-                        ]
+                        ],
+                        [
+                            [WIDTH/3, HEIGHT/3, self.key.key.width, self.key.key.height], # Keys
+                            [200, 400, self.key.key.width, self.key.key.height],
+                        ],
+                        []
                     ]
-        self.dark = [0,0,0]
+        self.key_kb = [ # List
+                               [ # Level
+                                   [ # Key
+                                       [ # Linked blocks | Note: Will be drew only if key is assigned
+                                           [0, 0, WIDTH/30.0, HEIGHT/2]
+                                       ],
+                                       [
+                                           [0, 0, WIDTH/30.0, HEIGHT/5]
+                                       ],
+                                    ],
+                                   [
+                                       [
+                                           [10, 0, 500, 500]
+                                       ],
+                                       [
+                                           [0, 0, WIDTH/30.0, HEIGHT/3]
+                                       ],
+                                    ]    
+                                ],
+                                [
+                                   [ 
+                                       [ 
+                                           [0, 0, WIDTH/5, HEIGHT/2]
+                                       ],
+                                       [
+                                           [0, 0, WIDTH/2, HEIGHT/5]
+                                       ],
+                                    ],
+                                   [
+                                       [
+                                           [600, 0, 200, 200]
+                                       ],
+                                       [
+                                           [0, 0, WIDTH/30.0, HEIGHT/3]
+                                       ],
+                                    ]
+                                ]
+                            ]
+        self.keys_id = [[[self.key_kb[0][0][0] ]]]
+
+        print(self.keys_id)
+        print(self.key_kb)
+        
+        self.key_use = []
+        self.cover_use = [0,0,0]
+        
+        self.fillers()
+        
+        for i in range(len(self.keys)):
+            if self.keys[i] == []:
+                self.key_use.append(0)
+            else:
+                self.key_use.append(1)
+                
+        self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish') 
+    def fillers(self):
         for i in range(900):
             self.kb.append([[r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)],
                              [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(10,400),r.randint(10,400)],
                              [r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(50,500),r.randint(50,500)]])
             self.sl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
             self.fl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
-            self.keys.append([[WIDTH, HEIGHT, 0, 0]])
-            self.dark.append(r.randint(0,1))
-            
-        self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
+            self.keys.append([])
+            self.cover_use.append(r.randint(0,1))
     def run_info(self, debug=0):
         self.ln_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Level: '+str(self.ln),1,(100,255,100))
         self.trail_text = pg.font.SysFont('Courier new', round(WIDTH/85.33)).render('Trail count: '+str(self.game.player.trail_count),1,(100,255,100))
@@ -195,11 +263,17 @@ class Level:
         for i in range(len(self.kb[self.ln])):
             self.game.block = Obstacle(self.game, self.kb[self.ln][i][0], self.kb[self.ln][i][1], self.kb[self.ln][i][2], self.kb[self.ln][i][3])
             self.game.block.blit()
-        for i in range(len(self.keys[self.ln])):
-            self.game.key = Active(self.game, l=self.keys[self.ln][i][0], t=self.keys[self.ln][i][1], type='key')
-            self.game.key.blit()
+        if self.key_use[self.ln]:
+            for i in range(len(self.keys[self.ln])):
+                self.game.key = Active(self.game, l=self.keys[self.ln][i][0], t=self.keys[self.ln][i][1], type='key')
+                self.game.key.blit()
+            for key in range(len(self.key_kb[self.ln])):
+                for j in range(len(self.key_kb[self.ln][key])):
+                    if self.key_kb[self.ln][key][j] != None:
+                        self.game.block = Obstacle(self.game, self.key_kb[self.ln][key][j][0][0], self.key_kb[self.ln][key][j][0][1], self.key_kb[self.ln][key][j][0][2], self.key_kb[self.ln][key][j][0][3])
+                        self.game.block.blit()
             
-        if self.dark[self.ln]:
+        if self.cover_use[self.ln]:
             self.game.cover.run()
         self.run_info(self.game.debug)
         
@@ -305,18 +379,18 @@ class Animation():
         for i in range(5):
             pg.draw.rect(self.game.app.sc, (0,0,0), self.list[i])
         
-        if r.randint(1, 150) == 1:
+        if r.randint(1, 100) == 1:
             self.direction = 'left'
-        if r.randint(1, 150) == 2:
+        elif r.randint(1, 100) == 2:
             self.direction = 'right'
             
         if self.direction == 'left':
             self.player.plr.left -= 2
-            if r.randint(1, 30) == 1:
+            if r.randint(1, 25) == 1:
                 self.direction = 'none'
         if self.direction == 'right':
             self.player.plr.left += 2
-            if r.randint(1, 30) == 1:
+            if r.randint(1, 25) == 1:
                 self.direction = 'none'
         self.player.plr.top += 2
         if self.player.plr.top >= HEIGHT+self.player.plr.height:
@@ -550,7 +624,8 @@ class Game:
             self.player.instance()
             self.player.check()
             self.player.check_win()
-            self.player.check_key()
+            if self.level.key_use[self.level.ln]:
+                self.player.check_key()
             self.level.run()
             if self.input[pg.K_UP]:
                 self.level.ln -= 1
