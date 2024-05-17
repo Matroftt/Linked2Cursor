@@ -113,7 +113,7 @@ class Player:
         for key in range(len(self.game.level.key_kb[self.game.level.ln])):
             for j in range(len(self.game.level.key_kb[self.game.level.ln][key])):
                 if self.game.level.key_kb[self.game.level.ln][key][j] != None:
-                    self.kb = pg.Rect(self.game.level.key_kb[self.game.level.ln][key][j][0][0], self.game.level.key_kb[self.game.level.ln][key][j][0][1], self.game.level.key_kb[self.game.level.ln][key][j][0][2], self.game.level.key_kb[self.game.level.ln][key][j][0][3])
+                    self.kb = pg.Rect(self.game.level.key_kb[self.game.level.ln][key][j][0], self.game.level.key_kb[self.game.level.ln][key][j][1], self.game.level.key_kb[self.game.level.ln][key][j][2], self.game.level.key_kb[self.game.level.ln][key][j][3])
                     if self.plr.colliderect(self.kb):
                         self.reset()       
                         self.cap = 0
@@ -186,39 +186,24 @@ class Level:
         self.key_kb = [ # List
                                [ # Level
                                    [ # Key
-                                       [ # Linked blocks | Note: Will be drew only if key is assigned
-                                           [0, 0, WIDTH/30.0, HEIGHT/2]
-                                       ],
-                                       [
-                                           [0, 0, WIDTH/30.0, HEIGHT/5]
-                                       ],
+                                        # Linked blocks | Note: Will be drew only if key is assigned
+                                        [0, 0, WIDTH/30.0, HEIGHT/2],
+                                        [0, 0, WIDTH/30.0, HEIGHT/5]
                                     ],
                                    [
-                                       [
-                                           [10, 0, 500, 500]
-                                       ],
-                                       [
-                                           [0, 0, WIDTH/30.0, HEIGHT/3]
-                                       ],
+                                        [10, 0, 500, 500],
+                                        [0, 0, WIDTH/30.0, HEIGHT/3]
                                     ]    
                                 ],
                                 [
                                    [ 
-                                       [ 
-                                           [0, 0, WIDTH/5, HEIGHT/2]
-                                       ],
-                                       [
-                                           [0, 0, WIDTH/2, HEIGHT/5]
-                                       ],
+                                        [0, 0, WIDTH/5, HEIGHT/2],
+                                        [0, 0, WIDTH/2, HEIGHT/5]
                                     ],
                                    [
-                                       [
-                                           [600, 0, 200, 200]
-                                       ],
-                                       [
-                                           [0, 0, WIDTH/30.0, HEIGHT/3]
-                                       ],
-                                    ]
+                                       [600, 0, 200, 200],
+                                       [0, 0, WIDTH/30.0, HEIGHT/3]
+                                   ]
                                 ]
                             ]
         self.keys_id = [[[self.key_kb[0][0][0] ]]]
@@ -270,7 +255,7 @@ class Level:
             for key in range(len(self.key_kb[self.ln])):
                 for j in range(len(self.key_kb[self.ln][key])):
                     if self.key_kb[self.ln][key][j] != None:
-                        self.game.block = Obstacle(self.game, self.key_kb[self.ln][key][j][0][0], self.key_kb[self.ln][key][j][0][1], self.key_kb[self.ln][key][j][0][2], self.key_kb[self.ln][key][j][0][3])
+                        self.game.block = Obstacle(self.game, self.key_kb[self.ln][key][j][0], self.key_kb[self.ln][key][j][1], self.key_kb[self.ln][key][j][2], self.key_kb[self.ln][key][j][3])
                         self.game.block.blit()
             
         if self.cover_use[self.ln]:
