@@ -106,9 +106,12 @@ class Player:
             self.key = pg.Rect(self.game.level.keys[self.game.level.ln][i][0], self.game.level.keys[self.game.level.ln][i][1], self.game.level.key.key.width, self.game.level.key.key.height)
             if self.plr.colliderect(self.key):
                 self.game.level.keys[self.game.level.ln][i] = [WIDTH, HEIGHT, 0, 0]
-                for j in range(len(self.game.level.key_kb[self.game.level.ln][i])):
-                    self.game.level.key_kb[self.game.level.ln][i][j] = None
-                print(self.game.level.key_kb)
+                try:
+                    for j in range(len(self.game.level.key_kb[self.game.level.ln][i])):
+                        self.game.level.key_kb[self.game.level.ln][i][j] = None
+                    print(self.game.level.key_kb)
+                except IndexError:
+                    pass
         # Check for the assigned kb's to keys
         for key in range(len(self.game.level.key_kb[self.game.level.ln])):
             for j in range(len(self.game.level.key_kb[self.game.level.ln][key])):
@@ -127,6 +130,8 @@ class Player:
         self.cap = 0
         self.plr.left = self.game.level.sl[self.game.level.ln][0]
         self.plr.top = self.game.level.sl[self.game.level.ln][1]
+        self.game.level.keys = self.game.level.keys_backup
+        self.game.level.key_kb = self.game.level.key_kb_backup # to be fixed
     def trail(self):
         for i in range(self.trail_count):
             self.game.app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
@@ -158,58 +163,40 @@ class Level:
 
                         ],      
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/1.0334, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/3.6571, HEIGHT/4.0421, WIDTH/20.48, HEIGHT/6.9818], [WIDTH/3.4133, HEIGHT/4.0421, WIDTH/11.3778, HEIGHT/19.2], [WIDTH/3.2, HEIGHT/2.8444, WIDTH/17.0667, HEIGHT/25.6], [WIDTH/2.9257, HEIGHT/2.6483, WIDTH/51.2, HEIGHT/10.9714], [WIDTH/2.8444, HEIGHT/2.2588, WIDTH/9.3091, HEIGHT/38.4], [WIDTH/2.3814, HEIGHT/3.2, WIDTH/25.6, HEIGHT/6.9818], [WIDTH/3.4133, HEIGHT/5.9077, WIDTH/14.6286, HEIGHT/9.6], [WIDTH/5.6889, HEIGHT/4.8, WIDTH/10.24, HEIGHT/6.4], [WIDTH/4.8762, HEIGHT/2.9538, WIDTH/11.3778, HEIGHT/5.4857], [WIDTH/3.7926, HEIGHT/1.9692, WIDTH/8.5333, HEIGHT/5.9077], [WIDTH/2.2261, HEIGHT/2.3273, WIDTH/7.8769, HEIGHT/6.4]
+                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/1.0334, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/10.3, 0, WIDTH/4.2917, HEIGHT/4.2778], [0, HEIGHT/2.9615, WIDTH/3.0294, HEIGHT/7.7], [WIDTH/2.4524, 0, WIDTH/10.3, HEIGHT/1.3276], [WIDTH/3.9615, HEIGHT/2.1389, WIDTH/12.875, HEIGHT/3.5], [WIDTH/10.3, HEIGHT/1.54, WIDTH/6.4375, HEIGHT/25], [WIDTH/10.3, HEIGHT/1.8333, WIDTH/6.4375, HEIGHT/9.625], [WIDTH/10.3, HEIGHT/2.1389, WIDTH/12.875, HEIGHT/38.5], [WIDTH/51.5, HEIGHT/1.1667, WIDTH/1.051, HEIGHT/9.625], [WIDTH/2.1458, 0, WIDTH/1.9808, HEIGHT/6.4167], [WIDTH/1.1196, HEIGHT/6.4167, WIDTH/12.875, HEIGHT/1.6042], [WIDTH/1.3205, HEIGHT/4.2778, WIDTH/25.75, HEIGHT/1.5], [WIDTH/1.6613, HEIGHT/4.2778, WIDTH/17.1667, HEIGHT/1.925]
                         ]
                   ]
         self.sl = [
                     [WIDTH/5, HEIGHT/1.2],
                     [WIDTH/20.5, HEIGHT/13.4],
-                    [WIDTH/1.5, HEIGHT/3]
+                    [WIDTH/17.167, HEIGHT/7]
                   ]
         self.fl = [
                     [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
                     [WIDTH/1.12, HEIGHT/38.4, WIDTH/9.31, HEIGHT/6.45],
-                    [0,0,85,80]
+                    [WIDTH/3.179, HEIGHT/42.78, WIDTH/9.1964, HEIGHT/7]
                   ]
         self.key = Active(self, type='key', l=500, t=500)
         self.keys = [ # List
-                        [ # Level
-                            [WIDTH/2, HEIGHT/2, self.key.key.width, self.key.key.height], # Keys
-                            [200, self.key.key.top, self.key.key.width, self.key.key.height],
-                        ],
+                        [], [],  # Level
                         [
-                            [WIDTH/3, HEIGHT/3, self.key.key.width, self.key.key.height], # Keys
-                            [200, 400, self.key.key.width, self.key.key.height],
-                        ],
-                        []
+                            [WIDTH/5.33678, HEIGHT/2.01044, self.key.key.width, self.key.key.height], # Keys
+                            [WIDTH/1.1087, HEIGHT/1.248, self.key.key.width, self.key.key.height]
+                        ]
                     ]
         self.key_kb = [ # List
-                               [ # Level
-                                   [ # Key
-                                        # Linked blocks | Note: Will be drew only if key is assigned
-                                        [0, 0, WIDTH/30.0, HEIGHT/2],
-                                        [0, 0, WIDTH/30.0, HEIGHT/5]
-                                    ],
-                                   [
-                                        [10, 0, 500, 500],
-                                        [0, 0, WIDTH/30.0, HEIGHT/3]
-                                    ]    
-                                ],
-                                [
-                                   [ 
-                                        [0, 0, WIDTH/5, HEIGHT/2],
-                                        [0, 0, WIDTH/2, HEIGHT/5]
-                                    ],
-                                   [
-                                       [600, 0, 200, 200],
-                                       [0, 0, WIDTH/30.0, HEIGHT/3]
-                                   ]
-                                ]
-                            ]
-        self.keys_id = [[[self.key_kb[0][0][0] ]]]
-
-        print(self.keys_id)
-        print(self.key_kb)
+                               [], [], # Level
+                               [ # Key
+                                  [ # Linked blocks | Note: Will be drew only if key is assigned
+                                      [WIDTH/1.9846, HEIGHT/1.4051, WIDTH/3.9, HEIGHT/24.8387]
+                                  ],
+                                  [
+                                      [WIDTH/3.0383, HEIGHT/7.33, WIDTH/12.875, HEIGHT/10.405]
+                                  ],      
+                               ]
+                       ]
+        self.keys_backup, self.key_kb_backup = self.keys, self.key_kb
+        print(self.key_kb_backup)
         
         self.key_use = []
         self.cover_use = [0,0,0]
@@ -273,7 +260,8 @@ class Active:
             pass
         
     def blit(self):
-        self.level.app.sc.blit(self.key_img,(self.key.left,self.key.top))
+        if self.type == 'key':
+            self.level.app.sc.blit(self.key_img,(self.key.left,self.key.top))
             
 class Obstacle:
     def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type='kb'):
@@ -469,15 +457,18 @@ class Game:
             self.editor_button.run()
             self.settings_button.run()  
             self.exit_button.run()
+            
             if self.input[pg.K_BACKSPACE]:
                 WIDTH, HEIGHT = 640, 480
                 self.app.write_config()
                 self.app.set_resolution()
+                
             if self.resolution != self.prev_resolution:
                 self.prev_resolution = self.resolution
             else:
                 self.set_w, self.set_h = WIDTH, HEIGHT
                 self.resolution = self.prev_resolution
+            
             
         elif self.tab == 'editor':
             self.pressed = pg.mouse.get_pressed()
@@ -540,7 +531,7 @@ class Game:
             
             if self.input[pg.K_TAB]:
                 self.app.sc.blit(self.player.plr_img,(self.cursor.mouse_x-self.player.plr.width,self.cursor.mouse_y-self.player.plr.height))
-            if self.key[pg.K_BACKSPACE]:
+            if self.input[pg.K_BACKSPACE]:
                 if self.obj_list != []:
                     self.del_obj = self.obj_list.pop(len(self.obj_list)-1)
                 else:
