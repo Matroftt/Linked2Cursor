@@ -60,7 +60,6 @@ class Cursor:
 class Player:
     def __init__(self, game, cap=0):
         self.game = game
-        self.paused = False
         self.cursor = Cursor()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
         self.plr = pg.Rect(0,0,WIDTH/51.2,HEIGHT/38.4)
@@ -76,9 +75,8 @@ class Player:
         self.trail()
         self.cursor.run()
         if cursor.colliderect(self.plr):
-            if not self.game.paused:
-                if not self.cap:
-                    self.cap = 1
+            if not self.cap:
+                self.cap = 1
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
                
         self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))   
@@ -187,7 +185,7 @@ class Level:
                     [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
                     [WIDTH/1.12, HEIGHT/38.4, WIDTH/5, HEIGHT/5],
                     [WIDTH/3.179, HEIGHT/42.78, WIDTH/9.1964, HEIGHT/7],
-                    [WIDTH/1.4733, HEIGHT/1.4528, WIDTH/2.12, HEIGHT/6.4167]
+                    [WIDTH/1.4733, HEIGHT/1.5528, WIDTH/2.12, HEIGHT/6.4167]
                   ]
         self.key = Active(self, type='key', l=500, t=500)
         self.keys = [ # List
@@ -209,7 +207,6 @@ class Level:
                                ]
                        ]
         self.keys_backup, self.key_kb_backup = self.keys, self.key_kb
-        print(1)
         
         self.key_use = []
         self.cover_use = [0,0,0,0,1]
@@ -280,7 +277,7 @@ class Active:
         self.level = level
         self.type = type
         
-        self.key = pg.Rect(l,t,40,19)
+        self.key = pg.Rect(l,t,WIDTH/25.6,HEIGHT/40.421)
         self.key_img = pg.transform.scale(pg.image.load('assets/key.png'), (self.key.width, self.key.height))
         if self.type == 'key':
             pass
@@ -407,7 +404,6 @@ class Game:
         self.cover = Cover(self)
         self.cursor = Cursor()
         self.tab = 'menu'
-        self.paused = False
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
         self.resolution = 0
         self.resolutions_list = [[300, 200], [400, 300], [640, 480], [800, 600], [1024, 768]]
@@ -427,11 +423,14 @@ class Game:
         self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125, action='icons')
         self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
         self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
+        self.continue_button = Button(self, 0, HEIGHT/3, WIDTH/5, HEIGHT/10, text='Continue', lo=WIDTH/35, to=-HEIGHT/125, action='play')
+        self.menu_button = Button(self, 0, HEIGHT/3+(HEIGHT/8), WIDTH/5, HEIGHT/10, text='To Menu', action='menu', lo=WIDTH/50, to=-HEIGHT/125)
+        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
+        
         self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
         #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
         
         # Settings
-        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
         self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=WIDTH/60, to=4, text='Apply', action='action_apply_resolution')
         self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_change_resolution')
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='action_music')
@@ -621,7 +620,10 @@ class Game:
                 WIDTH, HEIGHT = self.set_w, self.set_h
                 self.app.set_resolution()
                 self.set()
-            
+        elif self.tab == 'pause':
+            self.level.draw_text(data='Paused', size=round(WIDTH/10), color=(0,0,0))
+            self.continue_button.run()
+            self.menu_button.run()
         elif self.tab == 'play':
             self.player.instance()
             self.player.check()
@@ -641,14 +643,8 @@ class Game:
             if self.input[pg.K_ESCAPE]:
                 self.tab = 'menu'
             if self.input[pg.K_SPACE]:
-                if self.paused:
-                    self.paused = 0
-                else:
-                    self.paused = 1
-                time.sleep(0.1)
-            if self.paused:
-                self.pause = self.font.render('-- PAUSE --',0,(255,255,255))
-                self.app.sc.blit(self.pause,(WIDTH//3,HEIGHT//2-50))
+                self.player.cap = 0
+                self.tab = 'pause'
         else:
             print("This kind of tab does not exist.")
             self.tab = 'menu'
