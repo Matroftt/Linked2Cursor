@@ -22,7 +22,9 @@ backspace - reset resolution to 640, 480
 import pygame as pg, random as r, sys, time
 cursor = pg.Rect(0,0,1,1)
 WIDTH, HEIGHT = 640, 480
-
+def draw_text(x=0, y=0, data='Text', size=round(WIDTH/20), color=(100,100,100), smooth=1):
+    text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
+    app.sc.blit(text,(x,y))
 class Cover:
     def __init__(self, game):
         self.game = game
@@ -167,7 +169,7 @@ class Level:
 
                         ],      
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/1.0334, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/10.3, 0, WIDTH/4.2917, HEIGHT/4.2778], [0, HEIGHT/2.9615, WIDTH/3.0294, HEIGHT/7.7], [WIDTH/2.4524, 0, WIDTH/10.3, HEIGHT/1.3276], [WIDTH/3.9615, HEIGHT/2.1389, WIDTH/12.875, HEIGHT/3.5], [WIDTH/10.3, HEIGHT/1.54, WIDTH/6.4375, HEIGHT/25], [WIDTH/10.3, HEIGHT/1.8333, WIDTH/6.4375, HEIGHT/9.625], [WIDTH/10.3, HEIGHT/2.1389, WIDTH/12.875, HEIGHT/38.5], [WIDTH/51.5, HEIGHT/1.1667, WIDTH/1.051, HEIGHT/9.625], [WIDTH/2.1458, 0, WIDTH/1.9808, HEIGHT/6.4167], [WIDTH/1.1196, HEIGHT/6.4167, WIDTH/12.875, HEIGHT/1.6042], [WIDTH/1.3205, HEIGHT/4.2778, WIDTH/25.75, HEIGHT/1.5], [WIDTH/1.6613, HEIGHT/4.2778, WIDTH/17.1667, HEIGHT/1.925]
+                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/1.0334, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/10.3, 0, WIDTH/4.2917, HEIGHT/4.2778], [0, HEIGHT/2.9615, WIDTH/3.0294, HEIGHT/7.7], [WIDTH/2.4524, 0, WIDTH/10.3, HEIGHT/1.3276], [WIDTH/3.9615, HEIGHT/2.5389, WIDTH/12.875, HEIGHT/3.2], [WIDTH/10.3, HEIGHT/1.8333, WIDTH/6.4375, HEIGHT/5.625], [WIDTH/10.3, HEIGHT/2.2389, WIDTH/12.875, HEIGHT/30.5], [WIDTH/51.5, HEIGHT/1.1667, WIDTH/1.051, HEIGHT/9.625], [WIDTH/2.1458, 0, WIDTH/1.9808, HEIGHT/6.4167], [WIDTH/1.1196, HEIGHT/6.4167, WIDTH/12.875, HEIGHT/1.6042], [WIDTH/1.3205, HEIGHT/4.2778, WIDTH/25.75, HEIGHT/1.5], [WIDTH/1.6613, HEIGHT/4.2778, WIDTH/17.1667, HEIGHT/1.925]
                         ],
                         [
                             [0, 0, WIDTH/34.3333, HEIGHT/1.0], [WIDTH/34.3333, 0, WIDTH/1.03, HEIGHT/25.6667], [WIDTH/1.03, HEIGHT/25.6667, WIDTH/34.3333, HEIGHT/1], [WIDTH/34.3333, HEIGHT/1.0405, WIDTH/1.03, HEIGHT], [WIDTH/34.3333, HEIGHT/25.6667, WIDTH/4.4783, HEIGHT/4.2778], [WIDTH/2.8611, 0, WIDTH/1.5373, HEIGHT/3.6667], [WIDTH/9.3636, HEIGHT/2.5667, WIDTH/1.6094, HEIGHT/2.2], [WIDTH/1.4733, HEIGHT/1.7111, WIDTH/2.12, HEIGHT/9.625]
@@ -202,7 +204,7 @@ class Level:
                                       [WIDTH/1.9846, HEIGHT/1.4051, WIDTH/3.9, HEIGHT/24.8387]
                                   ],
                                   [
-                                      [WIDTH/3.0383, HEIGHT/7.33, WIDTH/12.875, HEIGHT/10.405]
+                                      [WIDTH/3.0383, HEIGHT/7.33, WIDTH/10.875, HEIGHT/8.405]
                                   ],      
                                ]
                        ]
@@ -230,26 +232,24 @@ class Level:
             self.keys.append([])
             self.cover_use.append(r.randint(0,1))
             
-    def draw_text(self, x=0, y=0, data='Text', size=round(WIDTH/20), color=(100,100,100), smooth=1):
-        text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
-        self.game.app.sc.blit(text,(x,y))
+
         
     def run_info(self, debug=0):
-        self.draw_text(data='Level: '+str(self.ln), size=round(WIDTH/85.33), color=(100,255,100))
+        draw_text(data='Level: '+str(self.ln), size=round(WIDTH/85.33), color=(100,255,100))
         if debug:
-            self.draw_text(x=0, y=WIDTH/85.33, data='Trail count: '+str(self.game.player.trail_count), size=round(WIDTH/85.33), color=(100,255,100))
-            self.draw_text(x=0, y=(WIDTH/85.33)*2, data='Cap: '+str(self.game.player.cap), size=round(WIDTH/85.33), color=(100,255,100))
+            draw_text(x=0, y=WIDTH/85.33, data='Trail count: '+str(self.game.player.trail_count), size=round(WIDTH/85.33), color=(100,255,100))
+            draw_text(x=0, y=(WIDTH/85.33)*2, data='Cap: '+str(self.game.player.cap), size=round(WIDTH/85.33), color=(100,255,100))
     def run_text(self):
         if self.ln == 0:
-            self.draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60), data='Welcome to Linked to cursor, aka LTC!', size=round(WIDTH/60), color=(0,0,0))
-            self.draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60)*3, data='To move your character, cover your cursor over it to capture him, and then move your cursor ', size=round(WIDTH/60), color=(0,0,0))
-            self.draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60)*7, data='Red rectangles will lead you to next level', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60), data='Welcome to Linked to cursor, aka LTC!', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60)*3, data='To move your character, cover your cursor over it to capture him, and then move your cursor ', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60)*7, data='Red rectangles will lead you to next level', size=round(WIDTH/60), color=(0,0,0))
         if self.ln == 1:
-            self.draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Black rectangles can kill you', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Black rectangles can kill you', size=round(WIDTH/60), color=(0,0,0))
         if self.ln == 3:
-            self.draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Collect keys in order to open some (unmarked) gates', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Collect keys in order to open some (unmarked) gates', size=round(WIDTH/60), color=(0,0,0))
         if self.ln == 4:
-            self.draw_text(x=WIDTH/2, y=WIDTH/40, data='Some levels can be really dark', size=round(WIDTH/60), color=(255,255,255))
+            draw_text(x=WIDTH/2, y=WIDTH/40, data='Some levels can be really dark', size=round(WIDTH/60), color=(255,255,255))
         
     def run(self):
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
@@ -621,7 +621,7 @@ class Game:
                 self.app.set_resolution()
                 self.set()
         elif self.tab == 'pause':
-            self.level.draw_text(data='Paused', size=round(WIDTH/10), color=(0,0,0))
+            draw_text(data='Paused', size=round(WIDTH/10), color=(0,0,0))
             self.continue_button.run()
             self.menu_button.run()
         elif self.tab == 'play':
