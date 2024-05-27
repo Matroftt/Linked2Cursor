@@ -67,14 +67,21 @@ class Particle:
         self.clr = clr
         self.dir = dir
         self.x, self.y = self.player.died_x, self.player.died_y
-        self.x_dir, self.y_dir = r.randint(-25, 25), r.randint(-25, 25)
-        self.instance = pg.Rect(self.x, self.y, 2, 2)
+        self.x_dir, self.y_dir = r.randint(-4, 4), r.randint(-4, 4)
+        self.instance = pg.Rect(self.x, self.y, 4, 4)
     def run(self):
+        self.instance = pg.Rect(self.x, self.y, 4, 4)
+        pg.draw.rect(self.player.game.app.sc, self.clr, self.instance)
         self.x += self.x_dir
         self.y += self.y_dir
-        self.instance = pg.Rect(self.x, self.y, 2, 2)
-        
-        pg.draw.rect(self.player.game.app.sc, self.clr, self.instance)
+        if self.x_dir > 0:
+            self.x_dir += 0.2
+        else:
+            self.x_dir -= 0.2
+        if self.y_dir > 0:
+            self.y_dir += 0.2
+        else:
+            self.y_dir -= 0.2
         
 class Player:
     def __init__(self, game, cap=0):
@@ -83,9 +90,11 @@ class Player:
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
         self.plr = pg.Rect(250,250,WIDTH/51.2,HEIGHT/38.4)
         self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
+        self.particles = []
         self.trails = []
         self.trail_count = 3
         self.particle_emit = 0
+        self.particle_count = 10
         self.died_x, self.died_y = 0, 0
         for i in range(self.trail_count):
             self.trails.append([-100, -100])
@@ -113,18 +122,20 @@ class Player:
                 self.plr.top = self.mouse_y
         
         if self.particle_emit > 0:
-            for i in range(5):
-                self.particle = Particle(self, clr=(0, 0, 0))
-                self.particle.run()
-            for i in range(5):
-                self.particle = Particle(self, clr=(255, 0, 0))
-                self.particle.run()
-            
-            self.particle_emit -= 0.05
+            for i in range(self.particle_count+round(self.particle_count/5)):
+                self.particles[i].run()
+            self.particle_emit -= 0.001
         
     def blit(self):
         self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))
     def emit(self):
+        self.particles = []
+        for i in range(self.particle_count):
+            self.particles.append(Particle(self, clr=(0, 0, 0)))
+            self.particles[i].x, self.particles[i].y = self.died_x, self.died_y
+        for i in range(round(self.particle_count/5)):
+            self.particles.append(Particle(self, clr=(200, 0, 0)))
+            self.particles[i].x, self.particles[i].y = self.died_x, self.died_y
         self.particle_emit = 1
     def check(self):
         self.check_kb()
@@ -144,7 +155,6 @@ class Player:
         for i in range(len(self.game.level.keys[self.game.level.ln])):
             self.key = pg.Rect(self.game.level.keys[self.game.level.ln][i][0], self.game.level.keys[self.game.level.ln][i][1], self.game.level.key.key.width, self.game.level.key.key.height)
             if self.plr.colliderect(self.key):
-                
                 self.game.level.keys[self.game.level.ln][i] = [WIDTH, HEIGHT, 0, 0]
                 try:
                     for j in range(len(self.game.level.key_kb[self.game.level.ln][i])):
