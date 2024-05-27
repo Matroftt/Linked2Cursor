@@ -23,9 +23,11 @@ backspace - reset resolution to 640, 480
 import pygame as pg, random as r, sys, time
 cursor = pg.Rect(0,0,1,1)
 WIDTH, HEIGHT = 640, 480
+
 def draw_text(x=0, y=0, data='Text', size=round(WIDTH/20), color=(100,100,100), smooth=1):
     text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
     app.sc.blit(text,(x,y))
+    
 class Cover:
     def __init__(self, game):
         self.game = game
@@ -59,22 +61,39 @@ class Cursor:
         cursor.left = self.mouse_x
         cursor.top = self.mouse_y
         
+class Particle:
+    def __init__(self, player, clr=(0,0,0), dir='random'):
+        self.player = player
+        self.clr = clr
+        self.dir = dir
+        self.x, self.y = self.player.died_x, self.player.died_y
+        self.x_dir, self.y_dir = r.randint(-25, 25), r.randint(-25, 25)
+        self.instance = pg.Rect(self.x, self.y, 2, 2)
+    def run(self):
+        self.x += self.x_dir
+        self.y += self.y_dir
+        self.instance = pg.Rect(self.x, self.y, 2, 2)
+        
+        pg.draw.rect(self.player.game.app.sc, self.clr, self.instance)
         
 class Player:
     def __init__(self, game, cap=0):
         self.game = game
         self.cursor = Cursor()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
-        self.plr = pg.Rect(0,0,WIDTH/51.2,HEIGHT/38.4)
+        self.plr = pg.Rect(250,250,WIDTH/51.2,HEIGHT/38.4)
         self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
         self.trails = []
         self.trail_count = 3
+        self.particle_emit = 0
+        self.died_x, self.died_y = 0, 0
         for i in range(self.trail_count):
             self.trails.append([-100, -100])
         self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
         
     def instance(self):
+        #self.particle = Particle(self)
         self.trail()
         self.cursor.run()
         if cursor.colliderect(self.plr):
@@ -92,10 +111,21 @@ class Player:
             elif self.game.app.cap_mode == 2:
                 self.plr.left = self.mouse_x
                 self.plr.top = self.mouse_y
-        else:
-            pass
+        
+        if self.particle_emit > 0:
+            for i in range(5):
+                self.particle = Particle(self, clr=(0, 0, 0))
+                self.particle.run()
+            for i in range(5):
+                self.particle = Particle(self, clr=(255, 0, 0))
+                self.particle.run()
+            
+            self.particle_emit -= 0.05
+        
     def blit(self):
-        self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top)) 
+        self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))
+    def emit(self):
+        self.particle_emit = 1
     def check(self):
         self.check_kb()
         if self.game.level.chase_use[self.game.level.ln]:
@@ -107,7 +137,7 @@ class Player:
         for i in range(len(self.game.level.kb[self.game.level.ln])):
             self.kb = pg.Rect(self.game.level.kb[self.game.level.ln][i][0], self.game.level.kb[self.game.level.ln][i][1], self.game.level.kb[self.game.level.ln][i][2], self.game.level.kb[self.game.level.ln][i][3])
             if self.plr.colliderect(self.kb):
-                self.reset()       
+                self.reset(1)       
                 self.cap = 0
     def check_key(self):
         # Check for the keys
@@ -127,19 +157,23 @@ class Player:
                 if self.game.level.key_kb[self.game.level.ln][key][j] != None:
                     self.kb = pg.Rect(self.game.level.key_kb[self.game.level.ln][key][j][0], self.game.level.key_kb[self.game.level.ln][key][j][1], self.game.level.key_kb[self.game.level.ln][key][j][2], self.game.level.key_kb[self.game.level.ln][key][j][3])
                     if self.plr.colliderect(self.kb):
-                        self.reset()       
+                        self.reset(1)       
                         self.cap = 0
     def check_chaser(self):
         if self.plr.colliderect(self.game.level.chaser.chaser):
-            self.reset()
+            self.reset(1)
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
             print('Level '+str(self.game.level.ln),'Completed')
             self.game.level.ln += 1
             self.reset()
       
-    def reset(self):
+    def reset(self, died=0):
         self.cap = 0
+        if died:
+            self.died_x = self.plr.left
+            self.died_y = self.plr.top
+            self.emit()
         self.plr.left = self.game.level.sl[self.game.level.ln][0]
         self.plr.top = self.game.level.sl[self.game.level.ln][1]
         if self.game.level.key_use[self.game.level.ln]:
@@ -316,11 +350,18 @@ class Chase:
             self.chaser.top -= self.speed
         if self.chaser.top < self.plr.top-self.plr.height:
             self.chaser.top += self.speed
-            
+        
+        # Bounds
+        
         if self.chaser.left < self.zl:
             self.chaser.left = self.zl
         if self.chaser.top < self.zt:
             self.chaser.top = self.zt
+        if self.chaser.top > self.zt + self.zh - self.chaser.height:
+            self.chaser.top = self.zt + self.zh - self.chaser.height
+        if self.chaser.left > self.zl + self.zw - self.chaser.width:
+            self.chaser.left = self.zl + self.zw - self.chaser.width
+        
     def animation(self):
         if self.chasing:
             if self.frame == 0:
