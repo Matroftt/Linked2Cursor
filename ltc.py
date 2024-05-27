@@ -7,6 +7,7 @@ kb - killblock/killbrick
 plr - player
 l - left; t - top; w - width; h - height
 lo - left offset; to - top offset
+(x)l - x left, (x)w - x width (e.g. zone left)
 clr - colour; hclr - highlight colour; bclr - backup colour; pclr - press colour
 
 list of hotkeys
@@ -79,9 +80,7 @@ class Player:
         if cursor.colliderect(self.plr):
             if not self.cap:
                 self.cap = 1
-        self.mouse_x,self.mouse_y = pg.mouse.get_pos()
-               
-        self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))   
+        self.mouse_x,self.mouse_y = pg.mouse.get_pos()  
         
         if self.cap:
             if self.game.app.cap_mode == 0:
@@ -95,7 +94,16 @@ class Player:
                 self.plr.top = self.mouse_y
         else:
             pass
+    def blit(self):
+        self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top)) 
     def check(self):
+        self.check_kb()
+        if self.game.level.chase_use[self.game.level.ln]:
+            self.check_chaser()
+        if self.game.level.key_use[self.game.level.ln]:
+            self.check_key()
+        self.check_win()
+    def check_kb(self):
         for i in range(len(self.game.level.kb[self.game.level.ln])):
             self.kb = pg.Rect(self.game.level.kb[self.game.level.ln][i][0], self.game.level.kb[self.game.level.ln][i][1], self.game.level.kb[self.game.level.ln][i][2], self.game.level.kb[self.game.level.ln][i][3])
             if self.plr.colliderect(self.kb):
@@ -121,6 +129,9 @@ class Player:
                     if self.plr.colliderect(self.kb):
                         self.reset()       
                         self.cap = 0
+    def check_chaser(self):
+        if self.plr.colliderect(self.game.level.chaser.chaser):
+            self.reset()
     def check_win(self):
         if self.plr.colliderect(self.game.finish.rect):
             print('Level '+str(self.game.level.ln),'Completed')
@@ -156,7 +167,7 @@ class Level:
         self.ln = ln
         self.kb = [
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/25.6667], [0, HEIGHT/25.6667, WIDTH/34.3333, HEIGHT/1.0405], [0, HEIGHT/1.0405, WIDTH/1.0, HEIGHT/25.6667]
+                            [0, 0, WIDTH/1.0, HEIGHT/25.6667], [0, HEIGHT/25.6667, WIDTH/34.3333, HEIGHT/1.0405], [0, HEIGHT/1.0405, WIDTH/1.0, HEIGHT]
                         ],
                         [
                              self.frame[0], self.frame[1], self.frame[2], self.frame[3],
@@ -165,7 +176,7 @@ class Level:
                              [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
                         ], 
                         [
-                              [0, 0, WIDTH/1.0, HEIGHT/38.4], [0, HEIGHT/38.4, WIDTH/51.5, HEIGHT/1.04], [0, HEIGHT/1.02, WIDTH/1.0, HEIGHT/38.4], [WIDTH/1.02, HEIGHT/38.4, WIDTH/51.5, HEIGHT/1.02], [WIDTH/8.58, HEIGHT/38.4, WIDTH/25.75, HEIGHT/1.48], [WIDTH/51.5, HEIGHT/1.1, WIDTH/2.71, HEIGHT/12.8], [WIDTH/2.86, HEIGHT/4.27, WIDTH/25.75, HEIGHT/1.38], [WIDTH/6.5, HEIGHT/1.54, WIDTH/10.3, HEIGHT/19.2], [WIDTH/3.96, HEIGHT/4.27, WIDTH/10, HEIGHT/19.2], [WIDTH/2.06, 0, WIDTH/25.75, HEIGHT/1.42], [WIDTH/2.71, HEIGHT/1.16, WIDTH/1.61, HEIGHT/7.68], [WIDTH/1.61, HEIGHT/5.49, WIDTH/25.75, HEIGHT/1.42], [WIDTH/4.29, HEIGHT/2.26, WIDTH/25.75, HEIGHT/19.2], [WIDTH/1.32, 0, WIDTH/25.75, HEIGHT/1.37], [WIDTH/1.12, HEIGHT/5.49, WIDTH/10.3, HEIGHT/1.42]
+                              [0, 0, WIDTH/1.0, HEIGHT/38.4], [0, HEIGHT/38.4, WIDTH/51.5, HEIGHT/1.04], [0, HEIGHT/1.02, WIDTH/1.0, HEIGHT/38.4], [WIDTH/1.02, HEIGHT/38.4, WIDTH/5, HEIGHT/1], [WIDTH/8.58, HEIGHT/38.4, WIDTH/25.75, HEIGHT/1.48], [WIDTH/51.5, HEIGHT/1.1, WIDTH/2.71, HEIGHT/12.8], [WIDTH/2.86, HEIGHT/4.27, WIDTH/25.75, HEIGHT/1.38], [WIDTH/6.5, HEIGHT/1.54, WIDTH/10.3, HEIGHT/19.2], [WIDTH/3.96, HEIGHT/4.27, WIDTH/10, HEIGHT/19.2], [WIDTH/2.06, 0, WIDTH/25.75, HEIGHT/1.42], [WIDTH/2.71, HEIGHT/1.16, WIDTH/1.61, HEIGHT/7.68], [WIDTH/1.61, HEIGHT/5.49, WIDTH/25.75, HEIGHT/1.42], [WIDTH/4.29, HEIGHT/2.26, WIDTH/25.75, HEIGHT/19.2], [WIDTH/1.32, 0, WIDTH/25.75, HEIGHT/1.37], [WIDTH/1.12, HEIGHT/5.49, WIDTH/10.3, HEIGHT/1.42]
 
                         ],      
                         [
@@ -183,13 +194,15 @@ class Level:
                     [WIDTH/3.5, HEIGHT/24]
                   ]
         self.fl = [
-                    [WIDTH/1.03, 0, WIDTH/34.3333, HEIGHT], 
+                    [WIDTH/1.03, 0, WIDTH, HEIGHT], 
                     [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
-                    [WIDTH/1.12, HEIGHT/38.4, WIDTH/5, HEIGHT/5],
+                    [WIDTH/1.12, HEIGHT/38.4, WIDTH, HEIGHT],
                     [WIDTH/3.179, HEIGHT/42.78, WIDTH/9.1964, HEIGHT/7],
                     [WIDTH/1.4733, HEIGHT/1.5528, WIDTH/2.12, HEIGHT/6.4167]
                   ]
-        self.key = Active(self, type='key', l=500, t=500)
+        self.key = Key(self, l=500, t=500)
+        self.chaser = Chase(self, zl=100, zt=100, zw=400, zh=400, speed=2)
+        
         self.keys = [ # List
                         [], [], [],  # Level
                         [
@@ -211,8 +224,8 @@ class Level:
         self.keys_backup, self.key_kb_backup = self.keys, self.key_kb
         
         self.key_use = []
-        self.cover_use = [0,0,0,0,1]
-        
+        self.cover_use = [0,0,0,0,1,0]
+        self.chase_use = [0,0,0,0,0,1]
         self.fillers()
         
         for i in range(len(self.keys)):
@@ -252,6 +265,9 @@ class Level:
             draw_text(x=WIDTH/2, y=WIDTH/40, data='Some levels can be really dark', size=round(WIDTH/60), color=(255,255,255))
         
     def run(self):
+        if self.ln == 5:
+            self.chaser.run()
+        self.game.player.blit()
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
         self.game.finish.blit()
         for i in range(len(self.kb[self.ln])):
@@ -259,8 +275,8 @@ class Level:
             self.game.block.blit()
         if self.key_use[self.ln]:
             for i in range(len(self.keys[self.ln])):
-                self.game.key = Active(self.game, l=self.keys[self.ln][i][0], t=self.keys[self.ln][i][1], type='key')
-                self.game.key.blit()
+                self.game.key = Key(self.game, l=self.keys[self.ln][i][0], t=self.keys[self.ln][i][1])
+                self.game.key.run()
             for key in range(len(self.key_kb[self.ln])):
                 for j in range(len(self.key_kb[self.ln][key])):
                     if self.key_kb[self.ln][key][j] != None:
@@ -271,20 +287,60 @@ class Level:
             self.game.cover.run()
         self.run_info(self.game.debug)
         self.run_text()
-        
-class Active:
-    def __init__(self, level, type='', l=0, t=0, linked=''):
+
+class Chase:
+    def __init__(self, level, l=0, t=0, zl=400, zt=400, zw=400, zh=200, speed=1):
         self.level = level
-        self.type = type
+        self.zone = pg.Rect(zl, zt, zw, zh)
+        self.chaser = pg.Rect(zl+zw/2,zt+zh/2,WIDTH/20.48,WIDTH/20.48)
+        self.chaser_img = pg.transform.scale(pg.image.load('assets/chaser.png'), (self.chaser.width, self.chaser.height))
+        self.chasing = 1
+        self.frame = 0
+        self.speed = speed
+        self.zl, self.zt, self.zw, self.zh = zl, zt, zw, zh
+        self.plr = self.level.game.player.plr
+        if self.speed > 10:
+            self.speed = 10
+    def run(self):
+        pg.draw.rect(self.level.game.app.sc, (150+10*self.speed, 50+10*self.speed, 50+10*self.speed), self.zone)
+        self.level.game.app.sc.blit(self.chaser_img,(self.chaser.left,self.chaser.top))
+        if self.plr.colliderect(self.zone):
+            self.chase()
+    def chase(self):
+        self.animation()
+        if self.chaser.left > self.plr.left-self.plr.width:
+            self.chaser.left -= self.speed
+        if self.chaser.left < self.plr.left-self.plr.width:
+            self.chaser.left += self.speed
+        if self.chaser.top > self.plr.top-self.plr.height:
+            self.chaser.top -= self.speed
+        if self.chaser.top < self.plr.top-self.plr.height:
+            self.chaser.top += self.speed
+            
+        if self.chaser.left < self.zl:
+            self.chaser.left = self.zl
+        if self.chaser.top < self.zt:
+            self.chaser.top = self.zt
+    def animation(self):
+        if self.chasing:
+            if self.frame == 0:
+                self.chaser_img = pg.transform.scale(pg.image.load('assets/chaser.png'), (self.chaser.width, self.chaser.height))
+                self.frame = 1
+            elif self.frame == 1:
+                self.chaser_img = pg.transform.scale(pg.image.load('assets/chaser2.png'), (self.chaser.width, self.chaser.height))
+                self.frame = 2
+            else:
+                self.chaser_img = pg.transform.scale(pg.image.load('assets/chaser3.png'), (self.chaser.width, self.chaser.height))
+                self.frame = 0
         
+class Key:
+    def __init__(self, level, l=0, t=0):
+        self.level = level
         self.key = pg.Rect(l,t,WIDTH/25.6,HEIGHT/40.421)
         self.key_img = pg.transform.scale(pg.image.load('assets/key.png'), (self.key.width, self.key.height))
-        if self.type == 'key':
-            pass
         
-    def blit(self):
-        if self.type == 'key':
-            self.level.app.sc.blit(self.key_img,(self.key.left,self.key.top))
+    def run(self):
+        self.level.app.sc.blit(self.key_img,(self.key.left,self.key.top))
             
 class Obstacle:
     def __init__(self, game, l=10, t=10, w=100, h=100, color=(0,0,0), type='kb'):
@@ -351,9 +407,8 @@ class Button:
             self.game.action = str(self.action.split('action_')[1])
         else:
             self.game.tab = self.action
-class Animation():
+class Animation:
     def __init__(self, game):
-        self.key = Active(self, 'key')
         self.game = game
         self.player = Player(self)
         self.player.plr.left = WIDTH/1.5
@@ -627,9 +682,6 @@ class Game:
         elif self.tab == 'play':
             self.player.instance()
             self.player.check()
-            self.player.check_win()
-            if self.level.key_use[self.level.ln]:
-                self.player.check_key()
             self.level.run()
             if self.input[pg.K_UP]:
                 self.level.ln -= 1
