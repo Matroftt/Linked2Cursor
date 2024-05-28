@@ -39,15 +39,15 @@ class Cover:
         self.cover.centery = self.game.player.plr.top + self.game.player.plr.height/2
         
     def blit(self):
-        self.game.app.sc.blit(self.cover_img,(self.cover.left,self.cover.top))
+        app.sc.blit(self.cover_img,(self.cover.left,self.cover.top))
         self.rect1 = pg.Rect(0,self.cover.top-HEIGHT,WIDTH,HEIGHT)
         self.rect2 = pg.Rect(0,self.cover.bottom,WIDTH,HEIGHT)
         self.rect3 = pg.Rect(self.cover.right,0,WIDTH,HEIGHT)
         self.rect4 = pg.Rect(self.cover.left-WIDTH,0,WIDTH,HEIGHT)
-        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect1)
-        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect2)
-        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect3)
-        pg.draw.rect(self.game.app.sc, (0,0,0), self.rect4)
+        pg.draw.rect(app.sc, (0,0,0), self.rect1)
+        pg.draw.rect(app.sc, (0,0,0), self.rect2)
+        pg.draw.rect(app.sc, (0,0,0), self.rect3)
+        pg.draw.rect(app.sc, (0,0,0), self.rect4)
         
         
         
@@ -69,19 +69,22 @@ class Particle:
         self.x, self.y = self.player.died_x, self.player.died_y
         self.x_dir, self.y_dir = r.randint(-4, 4), r.randint(-4, 4)
         self.instance = pg.Rect(self.x, self.y, 4, 4)
+        self.w, self.h = self.instance.width, self.instance.height
     def run(self):
-        self.instance = pg.Rect(self.x, self.y, 4, 4)
-        pg.draw.rect(self.player.game.app.sc, self.clr, self.instance)
+        self.instance = pg.Rect(self.x, self.y, self.w, self.h)
+        self.w, self.h = self.w - 0.05, self.h - 0.05
+        pg.draw.rect(app.sc, self.clr, self.instance)
         self.x += self.x_dir
         self.y += self.y_dir
         if self.x_dir > 0:
-            self.x_dir += 0.2
+            self.x_dir += 0.4
         else:
-            self.x_dir -= 0.2
+            self.x_dir -= 0.4
         if self.y_dir > 0:
-            self.y_dir += 0.2
+            self.y_dir += 0.4
         else:
-            self.y_dir -= 0.2
+            self.y_dir -= 0.4
+        
         
 class Player:
     def __init__(self, game, cap=0):
@@ -103,7 +106,6 @@ class Player:
         
     def instance(self):
         #self.particle = Particle(self)
-        self.trail()
         self.cursor.run()
         if cursor.colliderect(self.plr):
             if not self.cap:
@@ -121,13 +123,13 @@ class Player:
                 self.plr.left = self.mouse_x
                 self.plr.top = self.mouse_y
         
+    def blit(self):
+        self.trail()
+        app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))
         if self.particle_emit > 0:
             for i in range(self.particle_count+round(self.particle_count/5)):
                 self.particles[i].run()
             self.particle_emit -= 0.001
-        
-    def blit(self):
-        self.game.app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))
     def emit(self):
         self.particles = []
         for i in range(self.particle_count):
@@ -191,16 +193,16 @@ class Player:
                 self.game.level.keys[self.game.level.ln][0][i] = self.game.level.keys_backup[self.game.level.ln][0][i]
                 self.game.level.key_kb = self.game.level.key_kb_backup # to be fixed
     def trail(self):
-        for i in range(self.trail_count):
-            self.game.app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
-            
-        if self.trails[0][0] == self.plr.left and self.trails[0][1] == self.plr.top:
-            self.trails.insert(0, [WIDTH*2, HEIGHT*2])
-            self.trails.pop(self.trail_count-1)
-        else:
-            self.trails.insert(0, [self.plr.left, self.plr.top])
-            self.trails.pop(self.trail_count-1)
-        
+        if self.trail_count > 0:
+            for i in range(self.trail_count):
+                app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
+                
+            if self.trails[0][0] == self.plr.left and self.trails[0][1] == self.plr.top:
+                self.trails.insert(0, [WIDTH*2, HEIGHT*2])
+                self.trails.pop(self.trail_count-1)
+            else:
+                self.trails.insert(0, [self.plr.left, self.plr.top])
+                self.trails.pop(self.trail_count-1)
         
         
 class Level:
@@ -404,7 +406,7 @@ class Obstacle:
             self.color = (100,5,5)
         
     def blit(self):
-        pg.draw.rect(self.game.app.sc, self.color, self.rect)
+        pg.draw.rect(app.sc, self.color, self.rect)
 class Button:
     def __init__(self, game, l=0, t=0, w=150, h=60, shadow=1, text='Button', clr=(100,100,100), hclr=(150,150,150), pclr=(25,25,25), lo=0, to=0, action=None):
         self.game = game
@@ -430,9 +432,9 @@ class Button:
         self.check()
     def blit(self):
         if self.shadow:
-            pg.draw.rect(self.game.app.sc, (0,0,0), self.shadow_rect)
-        pg.draw.rect(self.game.app.sc, self.clr, self.rect)
-        self.game.app.sc.blit(self.text,(self.l+self.w/6-self.lo, self.t+self.h/10-self.to))
+            pg.draw.rect(app.sc, (0,0,0), self.shadow_rect)
+        pg.draw.rect(app.sc, self.clr, self.rect)
+        app.sc.blit(self.text,(self.l+self.w/6-self.lo, self.t+self.h/10-self.to))
     def check(self):
         self.pressed = pg.mouse.get_pressed()
         if self.rect.colliderect(cursor):
@@ -464,22 +466,26 @@ class Animation:
         self.player = Player(self)
         self.player.plr.left = WIDTH/1.5
         self.player.plr.top = -self.player.plr.height
+        self.player.particle_emit = 0
+        self.player.particle_count = 10
         self.direction = 'none'
         self.list = [pg.Rect(r.randint(round(WIDTH/3), round(WIDTH/1.001)), r.randint(0,HEIGHT-50), r.randint(round(WIDTH/64), round(WIDTH/16)), r.randint(round(HEIGHT/64), round(HEIGHT/8))) for i in range(5)]
     def run(self):
-        pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH/3, 0, WIDTH/64, HEIGHT))
-        pg.draw.rect(self.game.app.sc, (0,0,0), (WIDTH-WIDTH/64, 0, WIDTH/64, HEIGHT))
+        pg.draw.rect(app.sc, (0,0,0), (WIDTH/3, 0, WIDTH/64, HEIGHT))
+        pg.draw.rect(app.sc, (0,0,0), (WIDTH-WIDTH/64, 0, WIDTH/64, HEIGHT))
         for i in range(len(self.list)):
             self.kb = pg.Rect(self.list[i][0], self.list[i][1], self.list[i][2], self.list[i][3])
             if self.player.plr.colliderect(self.kb):
+                self.player.died_x, self.player.died_y = self.player.plr.centerx, self.player.plr.centery
                 self.player.plr.top = -self.player.plr.height
                 self.player.plr.left = WIDTH/1.5
+                self.player.emit()
             if self.player.plr.left <= WIDTH/1.5:
                 self.player.plr.left = WIDTH/1.5 + 10
             elif self.player.plr.left >= WIDTH-WIDTH/64:
                 self.player.plr.left = WIDTH-WIDTH/64 - 10
         for i in range(5):
-            pg.draw.rect(self.game.app.sc, (0,0,0), self.list[i])
+            pg.draw.rect(app.sc, (0,0,0), self.list[i])
         
         if r.randint(1, 100) == 1:
             self.direction = 'left'
@@ -498,8 +504,11 @@ class Animation:
         if self.player.plr.top >= HEIGHT+self.player.plr.height:
             self.player.plr.top = -self.player.plr.height
             #self.player.plr.left = WIDTH/1.5
-        
-        self.game.app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
+        if self.player.particle_emit > 0:
+            for i in range(self.player.particle_count+round(self.player.particle_count/5)):
+                self.player.particles[i].run()
+                self.player.particle_emit -= 0.001
+        app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
             
 class Game:
     def __init__(self, app):
@@ -519,6 +528,7 @@ class Game:
                 break
         self.prev_resolution = self.resolution
         self.debug = 1
+        self.bg_clr = (5, 5, 5)
         
         self.font = pg.font.SysFont('Courier new', round(WIDTH/20.48))
         self.editor_font = pg.font.SysFont('Courier new', round(WIDTH/68.27))
@@ -555,8 +565,8 @@ class Game:
         self.left, self.top, self.right, self.bottom = 0, 0, 0, 0 # To prevent crashes
         self.update_grid()
     def background(self):
-        self.app.sc.fill((0,0,0))
-        pg.draw.rect(self.app.sc,(255,255,255),(0,0,WIDTH,HEIGHT))
+        app.sc.fill(self.bg_clr)
+        pg.draw.rect(app.sc,(255,255,255),(0,0,WIDTH,HEIGHT))
     def update_grid(self):
         self.gridlist = []
         self.linex_list = [pg.Rect(0, i*self.grid_size, WIDTH, 1) for i in range(round(WIDTH/self.grid_size)+1)]
@@ -569,7 +579,7 @@ class Game:
             self.gridlist.append(self.liney)
     def draw_grid(self):
         for k in range(len(self.gridlist)):
-            pg.draw.rect(self.app.sc, (25,25,25), self.gridlist[k])
+            pg.draw.rect(app.sc, (25,25,25), self.gridlist[k])
     def set(self):
         self.action = ''
         time.sleep(0.05)
@@ -581,7 +591,7 @@ class Game:
         self.cursor.run()
         self.background()
         if self.tab == 'menu':
-            #self.app.sc.blit(self.logo_img,(self.logo.left,self.logo.top))
+            #app.sc.blit(self.logo_img,(self.logo.left,self.logo.top))
             self.menu_animation.run()
             self.play_button.run()
             self.icons_button.run()
@@ -661,7 +671,7 @@ class Game:
                 time.sleep(0.2)
             
             if self.input[pg.K_TAB]:
-                self.app.sc.blit(self.player.plr_img,(self.cursor.mouse_x-self.player.plr.width,self.cursor.mouse_y-self.player.plr.height))
+                app.sc.blit(self.player.plr_img,(self.cursor.mouse_x-self.player.plr.width,self.cursor.mouse_y-self.player.plr.height))
             if self.input[pg.K_BACKSPACE]:
                 if self.obj_list != []:
                     self.del_obj = self.obj_list.pop(len(self.obj_list)-1)
@@ -674,9 +684,9 @@ class Game:
                 self.rect = Obstacle(self, self.obj_list[i][0],self.obj_list[i][1],self.obj_list[i][2],self.obj_list[i][3])
                 self.rect.blit()
             self.draw_grid()
-            self.app.sc.blit(self.editor_font.render('Grid:'+str(self.grid_size)+'; K_LEFT K_RIGHT to change the value; K_UP to reset; K_DOWN to print result into console and reset.',0,(150,215,150)),(0,0))
-            self.app.sc.blit(self.editor_font.render('TAB to show test player; BACKSPACE to remove last object.',0,(150,215,150)),(0,15))
-            self.app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(150,215,150)),(0,HEIGHT-15))
+            app.sc.blit(self.editor_font.render('Grid:'+str(self.grid_size)+'; K_LEFT K_RIGHT to change the value; K_UP to reset; K_DOWN to print result into console and reset.',0,(150,215,150)),(0,0))
+            app.sc.blit(self.editor_font.render('TAB to show test player; BACKSPACE to remove last object.',0,(150,215,150)),(0,15))
+            app.sc.blit(self.editor_font.render('Total elements: '+str(len(self.obj_list))+'; LMB to set left&top of rect; RMB to set right&bottom of rect; SPACE to apply.',0,(150,215,150)),(0,HEIGHT-15))
             
                 
             if self.input[pg.K_ESCAPE]:
@@ -685,10 +695,10 @@ class Game:
         elif self.tab == 'icons':
             self.back_button.run()
         elif self.tab == 'settings':
-            self.app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)*2))
-            self.app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)))
-            self.app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(WIDTH//10,HEIGHT//2))
-            self.app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(WIDTH//10,HEIGHT//2+(HEIGHT/15.36)))
+            app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)*2))
+            app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)))
+            app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(WIDTH//10,HEIGHT//2))
+            app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(WIDTH//10,HEIGHT//2+(HEIGHT/15.36)))
             
             self.bool_resolution_button.run()
             self.apply_resolution_button.run()
