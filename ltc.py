@@ -90,9 +90,13 @@ class Player:
     def __init__(self, game, cap=0):
         self.game = game
         self.cursor = Cursor()
+        self.get_plr_size()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
         self.plr = pg.Rect(250,250,WIDTH/51.2,HEIGHT/38.4)
-        self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
+        try:
+            self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+self.icon_dir+'/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
+        except FileNotFoundError:
+            self.plr_img = pg.transform.scale(pg.image.load('assets/icons/default.png'), (self.plr.width, self.plr.height))
         self.particles = []
         self.trails = []
         self.trail_count = 3
@@ -103,7 +107,11 @@ class Player:
             self.trails.append([-100, -100])
         self.cap = cap
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
-        
+    
+    def get_plr_size(self):
+        self.icon_dir = "12"
+        if WIDTH/51.2 >= 16:
+            self.icon_dir = "20"
     def instance(self):
         #self.particle = Particle(self)
         self.cursor.run()
@@ -746,9 +754,11 @@ class Game:
             self.level.run()
             if self.input[pg.K_UP]:
                 self.level.ln -= 1
+                self.player.reset()
                 time.sleep(0.15)
             if self.input[pg.K_DOWN]:
                 self.level.ln += 1
+                self.player.reset()
                 time.sleep(0.15)
             if self.input[pg.K_LEFT]:
                 self.player.plr.left -= 20
@@ -767,14 +777,18 @@ class App:
         pg.init()
         pg.mixer.init()
         self.clock = pg.time.Clock()
+        self.set_prefs()
         self.read_config()
         self.check_music()
         self.play_music()
         self.game = Game(self)
-        
+    
     def exit(self):
         pg.quit()
         sys.exit()
+    def set_prefs(self):
+        pg.display.set_caption('Linked 2 Cursor')
+        pg.display.set_icon(pg.image.load('assets/icons/default.png'))
     def read_config(self):
         global WIDTH, HEIGHT
         self.config = open('assets/cfg.txt', 'r')
