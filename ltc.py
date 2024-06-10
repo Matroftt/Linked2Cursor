@@ -62,28 +62,40 @@ class Cursor:
         cursor.top = self.mouse_y
         
 class Particle:
-    def __init__(self, player, clr=(0,0,0), dir='random'):
+    def __init__(self, player, clr=(0,0,0), dir='random', type='rect', shrink=0):
         self.player = player
         self.clr = clr
         self.dir = dir
+        self.type = type
+        self.shrink = shrink
+        if self.dir == 'random':
+            self.x_dir, self.y_dir = r.randint(-4, 4), r.randint(-4, 4)
         self.x, self.y = self.player.died_x, self.player.died_y
-        self.x_dir, self.y_dir = r.randint(-4, 4), r.randint(-4, 4)
-        self.instance = pg.Rect(self.x, self.y, 4, 4)
-        self.w, self.h = self.instance.width, self.instance.height
+        self.d = 10
+        if self.type == 'rect':
+            self.instance = pg.Rect(self.x, self.y, 4, 4)
+            self.w, self.h = self.instance.width, self.instance.height
+        elif self.type == 'circle':
+            self.instance = (self.x, self.y, self.d)
     def run(self):
-        self.instance = pg.Rect(self.x, self.y, self.w, self.h)
-        self.w, self.h = self.w - 0.05, self.h - 0.05
-        pg.draw.rect(app.sc, self.clr, self.instance)
-        self.x += self.x_dir
-        self.y += self.y_dir
-        if self.x_dir > 0:
-            self.x_dir += 0.4
-        else:
-            self.x_dir -= 0.4
-        if self.y_dir > 0:
-            self.y_dir += 0.4
-        else:
-            self.y_dir -= 0.4
+        if self.type == 'rect':
+            self.instance = pg.Rect(self.x, self.y, self.w, self.h)
+            pg.draw.rect(app.sc, self.clr, self.instance)
+            self.x += self.x_dir
+            self.y += self.y_dir
+            if self.x_dir > 0:
+                self.x_dir += 0.4
+            else:
+                self.x_dir -= 0.4
+            if self.y_dir > 0:
+                self.y_dir += 0.4
+            else:
+                self.y_dir -= 0.4
+            if self.shrink:
+                self.w, self.h = self.w - 0.05, self.h - 0.05
+        if self.type == 'circle':
+            pg.draw.circle(app.sc, self.clr, (self.x, self.y), self.d, 1)
+            self.d += self.d/10
         
         
 class Player:
@@ -135,18 +147,23 @@ class Player:
         self.trail()
         app.sc.blit(self.plr_img,(self.plr.left,self.plr.top))
         if self.particle_emit > 0:
-            for i in range(self.particle_count+round(self.particle_count/5)):
+            for i in range(self.particle_count+round(self.particle_count/5)+2):
                 self.particles[i].run()
-            self.particle_emit -= 0.001
+            self.particle_emit -= 0.02
     def emit(self):
         self.particles = []
         for i in range(self.particle_count):
-            self.particles.append(Particle(self, clr=(0, 0, 0)))
+            self.particles.append(Particle(self, clr=(0, 0, 0), shrink=1))
             self.particles[i].x, self.particles[i].y = self.died_x, self.died_y
         for i in range(round(self.particle_count/5)):
-            self.particles.append(Particle(self, clr=(200, 0, 0)))
+            self.particles.append(Particle(self, clr=(200, 0, 0), shrink=1))
             self.particles[i].x, self.particles[i].y = self.died_x, self.died_y
+        for i in range(2):
+            self.particles.append(Particle(self, clr=(0, 0, 0), type='circle'))
+            self.particles[i].x, self.particles[i].y = self.died_x, self.died_y
+            self.particles[i+self.particle_count+round(self.particle_count/5)].d += i*3
         self.particle_emit = 1
+        
     def check(self):
         self.check_kb()
         if self.game.level.chase_use[self.game.level.ln]:
@@ -513,9 +530,9 @@ class Animation:
             self.player.plr.top = -self.player.plr.height
             #self.player.plr.left = WIDTH/1.5
         if self.player.particle_emit > 0:
-            for i in range(self.player.particle_count+round(self.player.particle_count/5)):
+            for i in range(self.player.particle_count+round(self.player.particle_count/5+2)):
                 self.player.particles[i].run()
-                self.player.particle_emit -= 0.001
+            self.player.particle_emit -= 0.03
         app.sc.blit(self.player.plr_img,(self.player.plr.left, self.player.plr.top))
             
 class Game:
