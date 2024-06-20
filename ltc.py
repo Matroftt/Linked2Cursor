@@ -24,7 +24,7 @@ import pygame as pg, random as r, sys, time
 cursor = pg.Rect(0,0,1,1)
 WIDTH, HEIGHT = 800, 600
 
-def draw_text(x=0, y=0, data='Text', size=round(WIDTH/20), color=(100,100,100), smooth=1):
+def draw_text(x=0, y=0, data='Text', size=round(32), color=(100,100,100), smooth=1):
     text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
     app.sc.blit(text,(x,y))
     
@@ -58,8 +58,8 @@ class Cursor:
         self.cursor = cursor
     def run(self):
         self.mouse_x, self.mouse_y = pg.mouse.get_pos()
-        cursor.left = self.mouse_x
-        cursor.top = self.mouse_y
+        cursor.left = 640*(self.mouse_x/WIDTH)
+        cursor.top  = 480*(self.mouse_y/HEIGHT)
         
 class Particle:
     def __init__(self, player, clr=(0,0,0), dir='random', type='rect', shrink=0):
@@ -104,7 +104,7 @@ class Player:
         self.cursor = Cursor()
         self.get_plr_size()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
-        self.plr = pg.Rect(250,250,WIDTH/51.2,WIDTH/51.2)
+        self.plr = pg.Rect(250,250,12,12)
         try:
             self.plr_img = pg.transform.smoothscale(pg.image.load('assets/icons/'+self.icon_dir+'/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
         except FileNotFoundError:
@@ -232,41 +232,41 @@ class Level:
     def __init__(self, game, ln=0):
         self.game = game
         self.frame = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
-                     [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
+                     [0,0,2130,HEIGHT],[WIDTH-2130+1,0,2130,HEIGHT]]
         self.ln = ln
         self.kb = [
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/25.6667], [0, HEIGHT/25.6667, WIDTH/34.3333, HEIGHT/1.0405], [0, HEIGHT/1.0405, WIDTH/1.0, HEIGHT]
+                            [0, 0, WIDTH/1.0, HEIGHT/25.6667], [0, HEIGHT/25.6667, 2134.3333, HEIGHT/1.0405], [0, HEIGHT/1.0405, WIDTH/1.0, HEIGHT]
                         ],
                         [
                              self.frame[0], self.frame[1], self.frame[2], self.frame[3],
-                             [WIDTH/1.77, HEIGHT/6.92, WIDTH/24.98, HEIGHT/1.17], [WIDTH/3.2, HEIGHT/2.19, WIDTH/1.83, HEIGHT/17.35],
-                             [WIDTH/1.32, 0, WIDTH/4.11, HEIGHT/3.93], [WIDTH/1.39, HEIGHT/1.42, WIDTH/3.56, HEIGHT/17.35],
-                             [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, HEIGHT/3.89]
+                             [WIDTH/1.77, HEIGHT/6.92, WIDTH/24.98, HEIGHT/1.17], [213.2, HEIGHT/2.19, WIDTH/1.83, HEIGHT/17.35],
+                             [WIDTH/1.32, 0, WIDTH/4.11, 160.93], [WIDTH/1.39, HEIGHT/1.42, 213.56, HEIGHT/17.35],
+                             [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, 160.89]
                         ], 
                         [
-                              [0, 0, WIDTH/1.0, HEIGHT/38.4], [0, HEIGHT/38.4, WIDTH/51.5, HEIGHT/1.04], [0, HEIGHT/1.02, WIDTH/1.0, HEIGHT/38.4], [WIDTH/1.02, HEIGHT/38.4, WIDTH/5, HEIGHT/1], [WIDTH/8.58, HEIGHT/38.4, WIDTH/25.75, HEIGHT/1.48], [WIDTH/51.5, HEIGHT/1.1, WIDTH/2.71, HEIGHT/12.8], [WIDTH/2.86, HEIGHT/4.27, WIDTH/25.75, HEIGHT/1.38], [WIDTH/6.5, HEIGHT/1.54, WIDTH/10.3, HEIGHT/19.2], [WIDTH/3.96, HEIGHT/4.27, WIDTH/10, HEIGHT/19.2], [WIDTH/2.06, 0, WIDTH/25.75, HEIGHT/1.42], [WIDTH/2.71, HEIGHT/1.16, WIDTH/1.61, HEIGHT/7.68], [WIDTH/1.61, HEIGHT/5.49, WIDTH/25.75, HEIGHT/1.42], [WIDTH/4.29, HEIGHT/2.26, WIDTH/25.75, HEIGHT/19.2], [WIDTH/1.32, 0, WIDTH/25.75, HEIGHT/1.37], [WIDTH/1.12, HEIGHT/5.49, WIDTH/10.3, HEIGHT/1.42]
+                              [0, 0, WIDTH/1.0, 1608.4], [0, 1608.4, 1281.5, HEIGHT/1.04], [0, HEIGHT/1.02, WIDTH/1.0, 1608.4], [WIDTH/1.02, 1608.4, 128, HEIGHT/1], [WIDTH/8.58, 1608.4, 26.75, HEIGHT/1.48], [1281.5, HEIGHT/1.1, WIDTH/2.71, HEIGHT/12.8], [WIDTH/2.86, HEIGHT/4.27, 26.75, HEIGHT/1.38], [WIDTH/6.5, HEIGHT/1.54, WIDTH/10.3, HEIGHT/19.2], [213.96, HEIGHT/4.27, WIDTH/10, HEIGHT/19.2], [WIDTH/2.06, 0, 26.75, HEIGHT/1.42], [WIDTH/2.71, HEIGHT/1.16, WIDTH/1.61, HEIGHT/7.68], [WIDTH/1.61, HEIGHT/5.49, 26.75, HEIGHT/1.42], [WIDTH/4.29, HEIGHT/2.26, 26.75, HEIGHT/19.2], [WIDTH/1.32, 0, 26.75, HEIGHT/1.37], [WIDTH/1.12, HEIGHT/5.49, WIDTH/10.3, HEIGHT/1.42]
 
                         ],      
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/1.0334, 0, WIDTH/30.0, HEIGHT/1.0], [WIDTH/10.3, 0, WIDTH/4.2917, HEIGHT/4.2778], [0, HEIGHT/2.9615, WIDTH/3.0294, HEIGHT/7.7], [WIDTH/2.4524, 0, WIDTH/10.3, HEIGHT/1.3276], [WIDTH/3.9615, HEIGHT/2.5389, WIDTH/12.875, HEIGHT/3.2], [WIDTH/10.3, HEIGHT/1.8333, WIDTH/6.4375, HEIGHT/5.625], [WIDTH/10.3, HEIGHT/2.2389, WIDTH/12.875, HEIGHT/30.5], [WIDTH/51.5, HEIGHT/1.1667, WIDTH/1.051, HEIGHT/9.625], [WIDTH/2.1458, 0, WIDTH/1.9808, HEIGHT/6.4167], [WIDTH/1.1196, HEIGHT/6.4167, WIDTH/12.875, HEIGHT/1.6042], [WIDTH/1.3205, HEIGHT/4.2778, WIDTH/25.75, HEIGHT/1.5], [WIDTH/1.6613, HEIGHT/4.2778, WIDTH/17.1667, HEIGHT/1.925]
+                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, 2130.0, HEIGHT/1.0], [WIDTH/1.0334, 0, 2130.0, HEIGHT/1.0], [WIDTH/10.3, 0, WIDTH/4.2917, HEIGHT/4.2778], [0, HEIGHT/2.9615, 213.0294, HEIGHT/7.7], [WIDTH/2.4524, 0, WIDTH/10.3, HEIGHT/1.3276], [213.9615, HEIGHT/2.5389, WIDTH/12.875, 160.2], [WIDTH/10.3, HEIGHT/1.8333, WIDTH/6.4375, HEIGHT/5.625], [WIDTH/10.3, HEIGHT/2.2389, WIDTH/12.875, 1600.5], [1281.5, HEIGHT/1.1667, WIDTH/1.051, HEIGHT/9.625], [WIDTH/2.1458, 0, WIDTH/1.9808, HEIGHT/6.4167], [WIDTH/1.1196, HEIGHT/6.4167, WIDTH/12.875, HEIGHT/1.6042], [WIDTH/1.3205, HEIGHT/4.2778, 26.75, HEIGHT/1.5], [WIDTH/1.6613, HEIGHT/4.2778, WIDTH/17.1667, HEIGHT/1.925]
                         ],
                         [
-                            [0, 0, WIDTH/34.3333, HEIGHT/1.0], [WIDTH/34.3333, 0, WIDTH/1.03, HEIGHT/25.6667], [WIDTH/1.03, HEIGHT/25.6667, WIDTH/34.3333, HEIGHT/1], [WIDTH/34.3333, HEIGHT/1.0405, WIDTH/1.03, HEIGHT], [WIDTH/34.3333, HEIGHT/25.6667, WIDTH/4.4783, HEIGHT/4.2778], [WIDTH/2.8611, 0, WIDTH/1.5373, HEIGHT/3.6667], [WIDTH/9.3636, HEIGHT/2.5667, WIDTH/1.6094, HEIGHT/2.2], [WIDTH/1.4733, HEIGHT/1.7111, WIDTH/2.12, HEIGHT/9.625]
+                            [0, 0, 2134.3333, HEIGHT/1.0], [2134.3333, 0, WIDTH/1.03, HEIGHT/25.6667], [WIDTH/1.03, HEIGHT/25.6667, 2134.3333, HEIGHT/1], [2134.3333, HEIGHT/1.0405, WIDTH/1.03, HEIGHT], [2134.3333, HEIGHT/25.6667, WIDTH/4.4783, HEIGHT/4.2778], [WIDTH/2.8611, 0, 427373, 160.6667], [WIDTH/9.3636, HEIGHT/2.5667, WIDTH/1.6094, HEIGHT/2.2], [WIDTH/1.4733, HEIGHT/1.7111, WIDTH/2.12, HEIGHT/9.625]
                         ]
                   ]
         self.sl = [
                     [WIDTH/2, HEIGHT/2],
-                    [WIDTH/5, HEIGHT/1.2],
-                    [WIDTH/20.5, HEIGHT/13.4],
+                    [128, HEIGHT/1.2],
+                    [32.5, HEIGHT/13.4],
                     [WIDTH/17.167, HEIGHT/7],
-                    [WIDTH/3.5, HEIGHT/24]
+                    [213.5, HEIGHT/24]
                   ]
         self.fl = [
                     [WIDTH/1.03, 0, WIDTH, HEIGHT], 
                     [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
-                    [WIDTH/1.12, HEIGHT/38.4, WIDTH, HEIGHT],
-                    [WIDTH/3.179, HEIGHT/42.78, WIDTH/9.1964, HEIGHT/7],
+                    [WIDTH/1.12, 1608.4, WIDTH, HEIGHT],
+                    [213.179, HEIGHT/42.78, WIDTH/9.1964, HEIGHT/7],
                     [WIDTH/1.4733, HEIGHT/1.5528, WIDTH/2.12, HEIGHT/6.4167]
                   ]
         self.key = Key(self, l=500, t=500)
@@ -275,7 +275,7 @@ class Level:
         self.keys = [ # List
                         [], [], [],  # Level
                         [
-                            [WIDTH/5.33678, HEIGHT/2.01044, self.key.key.width, self.key.key.height], # Keys
+                            [128.33678, HEIGHT/2.01044, self.key.key.width, self.key.key.height], # Keys
                             [WIDTH/1.1087, HEIGHT/1.248, self.key.key.width, self.key.key.height]
                         ]
                     ]
@@ -283,10 +283,10 @@ class Level:
                                [], [], [], # Level
                                [ # Key
                                   [ # Linked blocks | Note: Will be drew only if key is assigned
-                                      [WIDTH/1.9846, HEIGHT/1.4051, WIDTH/3.9, HEIGHT/24.8387]
+                                      [WIDTH/1.9846, HEIGHT/1.4051, 213.9, HEIGHT/24.8387]
                                   ],
                                   [
-                                      [WIDTH/3.0383, HEIGHT/7.33, WIDTH/10.875, HEIGHT/8.405]
+                                      [213.0383, HEIGHT/7.33, WIDTH/10.875, 60.405]
                                   ],      
                                ]
                        ]
@@ -361,8 +361,8 @@ class Chase:
     def __init__(self, level, l=0, t=0, zl=400, zt=400, zw=400, zh=200, speed=1):
         self.level = level
         self.zone = pg.Rect(zl, zt, zw, zh)
-        self.chaser = pg.Rect(zl+zw/2,zt+zh/2,WIDTH/20.48,WIDTH/20.48)
-        self.chaser_img = pg.transform.scale(pg.image.load('assets/chaser.png'), (self.chaser.width, self.chaser.height))
+        self.chaser = pg.Rect(zl+zw/2,zt+zh/2,32,32)
+        self.chaser_img = pg.transform.smoothscale(pg.image.load('assets/chaser.png'), (self.chaser.width, self.chaser.height))
         self.chasing = 1
         self.frame = 0
         self.speed = speed
@@ -412,7 +412,7 @@ class Chase:
 class Key:
     def __init__(self, level, l=0, t=0):
         self.level = level
-        self.key = pg.Rect(l,t,WIDTH/25.6,HEIGHT/40.421)
+        self.key = pg.Rect(l,t,26.6,HEIGHT/40.421)
         self.key_img = pg.transform.scale(pg.image.load('assets/key.png'), (self.key.width, self.key.height))
         
     def run(self):
@@ -435,7 +435,7 @@ class Button:
         self.game = game
         self.shadow = shadow
         self.shadow_rect = pg.Rect(l+2,t+2,w,h)
-        self.font = pg.font.SysFont('Courier new', round(WIDTH/25.6))  
+        self.font = pg.font.SysFont('Courier new', 25)  
         self.text = self.font.render(text,1,(0,0,0))
         self.clr = clr
         self.bclr = clr
@@ -487,26 +487,26 @@ class Animation:
     def __init__(self, game):
         self.game = game
         self.player = Player(self)
-        self.player.plr.left = WIDTH/1.5
+        self.player.plr.left = 427
         self.player.plr.top = -self.player.plr.height
         self.player.particle_emit = 0
         self.player.particle_count = 10
         self.direction = 'none'
-        self.list = [pg.Rect(r.randint(round(WIDTH/3), round(WIDTH/1.001)), r.randint(0,HEIGHT-50), r.randint(round(WIDTH/64), round(WIDTH/16)), r.randint(round(HEIGHT/64), round(HEIGHT/8))) for i in range(5)]
+        self.list = [pg.Rect(r.randint(213, 640), r.randint(0,HEIGHT-50), r.randint(round(10), round(WIDTH/16)), r.randint(8, 60)) for i in range(5)]
     def run(self):
-        pg.draw.rect(app.sc, (0,0,0), (WIDTH/3, 0, WIDTH/64, HEIGHT))
-        pg.draw.rect(app.sc, (0,0,0), (WIDTH-WIDTH/64, 0, WIDTH/64, HEIGHT))
+        pg.draw.rect(app.sc, (0,0,0), (213, 0, 10, HEIGHT))
+        pg.draw.rect(app.sc, (0,0,0), (WIDTH-10, 0, 10, HEIGHT))
         for i in range(len(self.list)):
             self.kb = pg.Rect(self.list[i][0], self.list[i][1], self.list[i][2], self.list[i][3])
             if self.player.plr.colliderect(self.kb):
                 self.player.died_x, self.player.died_y = self.player.plr.centerx, self.player.plr.centery
                 self.player.plr.top = -self.player.plr.height
-                self.player.plr.left = WIDTH/1.5
+                self.player.plr.left = 427
                 self.player.emit()
-            if self.player.plr.left <= WIDTH/1.5:
-                self.player.plr.left = WIDTH/1.5 + 10
-            elif self.player.plr.left >= WIDTH-WIDTH/64:
-                self.player.plr.left = WIDTH-WIDTH/64 - 10
+            if self.player.plr.left <= 427:
+                self.player.plr.left = 427 + 10
+            elif self.player.plr.left >= WIDTH-10:
+                self.player.plr.left = WIDTH-10 - 10
         for i in range(5):
             pg.draw.rect(app.sc, (0,0,0), self.list[i])
         
@@ -526,7 +526,7 @@ class Animation:
         self.player.plr.top += 2
         if self.player.plr.top >= HEIGHT+self.player.plr.height:
             self.player.plr.top = -self.player.plr.height
-            #self.player.plr.left = WIDTH/1.5
+            #self.player.plr.left = 427
         if self.player.particle_emit > 0:
             for i in range(self.player.particle_count+round(self.player.particle_count/5+2)):
                 self.player.particles[i].run()
@@ -544,7 +544,7 @@ class Game:
         self.tab = 'menu'
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
         self.resolution = 0
-        self.resolutions_list = [[400, 300], [640, 480], [800, 600], [1024, 768]]
+        self.resolutions_list = [[640, 480], [800, 600], [1024, 768]]
         for i in range(len(self.resolutions_list)):
             if [WIDTH, HEIGHT] == self.resolutions_list[i]:
                 self.resolution = i
@@ -553,33 +553,33 @@ class Game:
         self.debug = 1
         self.bg_clr = (5, 5, 5)
         
-        self.font = pg.font.SysFont('Courier new', round(WIDTH/20.48))
-        self.editor_font = pg.font.SysFont('Courier new', round(WIDTH/68.27))
+        self.font = pg.font.SysFont('Courier new', 31)
+        self.editor_font = pg.font.SysFont('Courier new', 9)
         
         
         # Main Menu
-        self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
-        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=16, to=-HEIGHT/125, action='icons')
-        self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=16, to=-HEIGHT/125, action='editor') 
-        self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
-        self.continue_button = Button(self, 0, HEIGHT/3, WIDTH/5, HEIGHT/10, text='Continue', lo=WIDTH/35, to=-HEIGHT/125, action='play')
-        self.menu_button = Button(self, 0, HEIGHT/3+(HEIGHT/8), WIDTH/5, HEIGHT/10, text='To Menu', action='menu', lo=16, to=-HEIGHT/125)
-        self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
+        self.play_button = Button(self, 0, 160, 96, 48, text='Play', action='play', to=-3.84)
+        self.icons_button = Button(self, 0, 160+60, 96, 48, text='Avatar', lo=16, to=-3.84, action='icons')
+        self.editor_button = Button(self, 0, 160+(60)*2, 96, 48, text='Editor', lo=16, to=-3.84, action='editor') 
+        self.settings_button = Button(self, 0, 160+(60)*3, 128, 48, text='Settings', lo=18, to=-3.84, action='settings') 
+        self.continue_button = Button(self, 0, 160, 128, 48, text='Continue', lo=18, to=-3.84, action='play')
+        self.menu_button = Button(self, 0, 160+(60), 128, 48, text='To Menu', action='menu', lo=16, to=-3.84)
+        self.exit_button = Button(self, 0, 160+(60)*4, 96, 48, text='Exit', action='leave', to=-3.84)
         
-        self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
+        self.logo = pg.Rect(0, 10, WIDTH/4, (WIDTH/4)/1.45)
         #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
         
         # Settings
-        self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=13, to=4, text='Apply', action='action_apply_resolution')
-        self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_change_resolution')
-        self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='action_music')
-        self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_fullscreen')
-        self.bool_capmode_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36)*2, WIDTH/25, WIDTH/25, text='•', action='action_cap_mode')
+        self.apply_resolution_button = Button(self, 337, 213-(32), WIDTH/8, 26, lo=13, to=4, text='Apply', action='action_apply_resolution')
+        self.bool_resolution_button = Button(self, 26, 213-(32), 26, 26, text='•', action='action_change_resolution')
+        self.bool_music_button = Button(self, 26, 213, 26, 26, text='•', action='action_music')
+        self.bool_fullscreen_button = Button(self, 26, 213+(32), 26, 26, text='•', action='action_fullscreen')
+        self.bool_capmode_button = Button(self, 26, 213+(32)*2, 26, 26, text='•', action='action_cap_mode')
         self.action = ''
         
         self.set_w, self.set_h = WIDTH, HEIGHT
         
-        self.back_button = Button(self, 0, 0, WIDTH/20, WIDTH/20, text='←', action='menu', to=HEIGHT/125)
+        self.back_button = Button(self, 0, 0, 32, 32, text='←', action='menu', to=3.84)
         
         # Editor
         self.obj_list = self.level.frame
@@ -650,7 +650,7 @@ class Game:
                 
             if self.input[pg.K_UP]:
                 self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
-                                [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
+                                [0,0,2130,HEIGHT],[WIDTH-2130+1,0,2130,HEIGHT]]
             if self.input[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
@@ -672,7 +672,7 @@ class Game:
                              
                 print(self.obj_list)
                 self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
-                                 [0,0,WIDTH/30,HEIGHT],[WIDTH-WIDTH/30+1,0,WIDTH/30,HEIGHT]]
+                                 [0,0,2130,HEIGHT],[WIDTH-2130+1,0,2130,HEIGHT]]
                 time.sleep(0.33)
                 
             if self.input[pg.K_RIGHT]:
@@ -718,10 +718,10 @@ class Game:
         elif self.tab == 'icons':
             self.back_button.run()
         elif self.tab == 'settings':
-            app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)*2))
-            app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(WIDTH//10,HEIGHT//2-(HEIGHT/15.36)))
-            app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(WIDTH//10,HEIGHT//2))
-            app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(WIDTH//10,HEIGHT//2+(HEIGHT/15.36)))
+            app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(64,240-(32)*2))
+            app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(64,240-(32)))
+            app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(64,240))
+            app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(64,240+(32)))
             
             self.bool_resolution_button.run()
             self.apply_resolution_button.run()
@@ -827,7 +827,7 @@ class App:
         if self.fullscreen:
             self.actual_sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
         #self.sc = self.actual_sc.copy()
-        self.sc = pg.Surface((800, 600))
+        self.sc = pg.Surface((640, 480))
             
     def play_music(self):
         self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
@@ -846,8 +846,8 @@ class App:
         while True:
             self.game.run()
             #self.actual_sc.fill((255,255,255))
-            #self.actual_sc.blit(pg.transform.smoothscale(self.sc, self.actual_sc.get_rect().size), (0,0))
-            self.actual_sc.blit(self.sc, (0,0))
+            self.actual_sc.blit(pg.transform.smoothscale(self.sc, (WIDTH, HEIGHT)), (0,0))
+            #self.actual_sc.blit(self.sc, (0,0))
             self.check_events()
             self.check_music()
             pg.display.update()
