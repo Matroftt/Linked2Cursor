@@ -22,7 +22,7 @@ backspace - reset resolution to 640, 480
 
 import pygame as pg, random as r, sys, time
 cursor = pg.Rect(0,0,1,1)
-WIDTH, HEIGHT = 640, 480
+WIDTH, HEIGHT = 800, 600
 
 def draw_text(x=0, y=0, data='Text', size=round(WIDTH/20), color=(100,100,100), smooth=1):
     text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
@@ -104,7 +104,7 @@ class Player:
         self.cursor = Cursor()
         self.get_plr_size()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
-        self.plr = pg.Rect(250,250,16,16)
+        self.plr = pg.Rect(250,250,WIDTH/51.2,WIDTH/51.2)
         try:
             self.plr_img = pg.transform.smoothscale(pg.image.load('assets/icons/'+self.icon_dir+'/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
         except FileNotFoundError:
@@ -544,7 +544,7 @@ class Game:
         self.tab = 'menu'
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
         self.resolution = 0
-        self.resolutions_list = [[300, 200], [400, 300], [640, 480], [800, 600], [1024, 768]]
+        self.resolutions_list = [[400, 300], [640, 480], [800, 600], [1024, 768]]
         for i in range(len(self.resolutions_list)):
             if [WIDTH, HEIGHT] == self.resolutions_list[i]:
                 self.resolution = i
@@ -823,10 +823,11 @@ class App:
         self.check_fullscreen()
         self.game = Game(self)
     def check_fullscreen(self):
-        self.sc = pg.display.set_mode((800, 600))
-        if self.fullscreen:
-            self.sc = pg.display.set_mode((800, 600), pg.FULLSCREEN)
         self.actual_sc = pg.display.set_mode((WIDTH, HEIGHT))
+        if self.fullscreen:
+            self.actual_sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
+        #self.sc = self.actual_sc.copy()
+        self.sc = pg.Surface((800, 600))
             
     def play_music(self):
         self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
@@ -845,10 +846,12 @@ class App:
         while True:
             self.game.run()
             #self.actual_sc.fill((255,255,255))
-            self.actual_sc.blit(pg.transform.smoothscale(self.sc, (WIDTH, HEIGHT)), (0,0))
+            #self.actual_sc.blit(pg.transform.smoothscale(self.sc, self.actual_sc.get_rect().size), (0,0))
+            self.actual_sc.blit(self.sc, (0,0))
             self.check_events()
             self.check_music()
             pg.display.update()
+            pg.display.flip()
             self.clock.tick(75)
 
 if __name__ == '__main__':
