@@ -31,7 +31,7 @@ def draw_text(x=0, y=0, data='Text', size=round(WIDTH/20), color=(100,100,100), 
 class Cover:
     def __init__(self, game):
         self.game = game
-        self.cover = pg.Rect(500, 500, WIDTH/3.413, WIDTH/3.413)
+        self.cover = pg.Rect(500, 500, 235, 235)
         self.cover_img = pg.transform.scale(pg.image.load('assets/cover.png'), (self.cover.width, self.cover.height))
     def run(self):
         self.blit()
@@ -104,11 +104,11 @@ class Player:
         self.cursor = Cursor()
         self.get_plr_size()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
-        self.plr = pg.Rect(250,250,WIDTH/51.2,HEIGHT/38.4)
+        self.plr = pg.Rect(250,250,16,16)
         try:
-            self.plr_img = pg.transform.scale(pg.image.load('assets/icons/'+self.icon_dir+'/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
+            self.plr_img = pg.transform.smoothscale(pg.image.load('assets/icons/'+self.icon_dir+'/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
         except FileNotFoundError:
-            self.plr_img = pg.transform.scale(pg.image.load('assets/icons/default.png'), (self.plr.width, self.plr.height))
+            self.plr_img = pg.transform.smoothscale(pg.image.load('assets/icons/default.png'), (self.plr.width, self.plr.height))
         self.particles = []
         self.trails = []
         self.trail_count = 3
@@ -121,9 +121,7 @@ class Player:
         self.mouse_x,self.mouse_y = pg.mouse.get_pos()
     
     def get_plr_size(self):
-        self.icon_dir = "12"
-        if WIDTH/51.2 >= 16:
-            self.icon_dir = "20"
+        self.icon_dir = "20"
     def instance(self):
         #self.particle = Particle(self)
         self.cursor.run()
@@ -223,7 +221,7 @@ class Player:
                 app.sc.blit(self.plr_img, (self.trails[i][0],self.trails[i][1]))
                 
             if self.trails[0][0] == self.plr.left and self.trails[0][1] == self.plr.top:
-                self.trails.insert(0, [WIDTH*2, HEIGHT*2])
+                self.trails.insert(0, [WIDTH, HEIGHT])
                 self.trails.pop(self.trail_count-1)
             else:
                 self.trails.insert(0, [self.plr.left, self.plr.top])
@@ -319,21 +317,21 @@ class Level:
 
         
     def run_info(self, debug=0):
-        draw_text(data='Level: '+str(self.ln), size=round(WIDTH/85.33), color=(100,255,100))
+        draw_text(data='Level: '+str(self.ln), size=10, color=(100,255,100))
         if debug:
-            draw_text(x=0, y=WIDTH/85.33, data='Trail count: '+str(self.game.player.trail_count), size=round(WIDTH/85.33), color=(100,255,100))
-            draw_text(x=0, y=(WIDTH/85.33)*2, data='Cap: '+str(self.game.player.cap), size=round(WIDTH/85.33), color=(100,255,100))
+            draw_text(x=0, y=10, data='Trail count: '+str(self.game.player.trail_count), size=10, color=(100,255,100))
+            draw_text(x=0, y=20, data='Cap: '+str(self.game.player.cap), size=10, color=(100,255,100))
     def run_text(self):
         if self.ln == 0:
-            draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60), data='Welcome to Linked to cursor, aka LTC!', size=round(WIDTH/60), color=(0,0,0))
-            draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60)*3, data='To move your character, cover your cursor over it to capture him, and then move your cursor ', size=round(WIDTH/60), color=(0,0,0))
-            draw_text(x=WIDTH/50+round(WIDTH/60), y=WIDTH/50+round(WIDTH/60)*7, data='Red rectangles will lead you to next level', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=29, y=29, data='Welcome to Linked to cursor, aka LTC!', size=13, color=(0,0,0))
+            draw_text(x=29, y=29*3, data='To move your character, cover your cursor over it to capture him, and then move your cursor ', size=13, color=(0,0,0))
+            draw_text(x=29, y=29*7, data='Red rectangles will lead you to next level', size=13, color=(0,0,0))
         if self.ln == 1:
-            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Black rectangles can kill you', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Black rectangles can kill you', size=13, color=(0,0,0))
         if self.ln == 3:
-            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Collect keys in order to open some (unmarked) gates', size=round(WIDTH/60), color=(0,0,0))
+            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Collect keys in order to open some (unmarked) gates', size=13, color=(0,0,0))
         if self.ln == 4:
-            draw_text(x=WIDTH/2, y=WIDTH/40, data='Some levels can be really dark', size=round(WIDTH/60), color=(255,255,255))
+            draw_text(x=WIDTH/2, y=WIDTH/40, data='Some levels can be really dark', size=13, color=(255,255,255))
         
     def run(self):
         if self.ln == 5:
@@ -561,18 +559,18 @@ class Game:
         
         # Main Menu
         self.play_button = Button(self, 0, HEIGHT/3, WIDTH/6.67, HEIGHT/10, text='Play', action='play', to=-HEIGHT/125)
-        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=WIDTH/50, to=-HEIGHT/125, action='icons')
-        self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=WIDTH/50, to=-HEIGHT/125, action='editor') 
+        self.icons_button = Button(self, 0, HEIGHT/3+HEIGHT/8, WIDTH/6.67, HEIGHT/10, text='Avatar', lo=16, to=-HEIGHT/125, action='icons')
+        self.editor_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*2, WIDTH/6.67, HEIGHT/10, text='Editor', lo=16, to=-HEIGHT/125, action='editor') 
         self.settings_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*3, WIDTH/5, HEIGHT/10, text='Settings', lo=WIDTH/35, to=-HEIGHT/125, action='settings') 
         self.continue_button = Button(self, 0, HEIGHT/3, WIDTH/5, HEIGHT/10, text='Continue', lo=WIDTH/35, to=-HEIGHT/125, action='play')
-        self.menu_button = Button(self, 0, HEIGHT/3+(HEIGHT/8), WIDTH/5, HEIGHT/10, text='To Menu', action='menu', lo=WIDTH/50, to=-HEIGHT/125)
+        self.menu_button = Button(self, 0, HEIGHT/3+(HEIGHT/8), WIDTH/5, HEIGHT/10, text='To Menu', action='menu', lo=16, to=-HEIGHT/125)
         self.exit_button = Button(self, 0, HEIGHT/3+(HEIGHT/8)*4, WIDTH/6.67, HEIGHT/10, text='Exit', action='leave', to=-HEIGHT/125)
         
         self.logo = pg.Rect(0, WIDTH/64, WIDTH/4, (WIDTH/4)/1.45)
         #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
         
         # Settings
-        self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=WIDTH/60, to=4, text='Apply', action='action_apply_resolution')
+        self.apply_resolution_button = Button(self, WIDTH//1.9, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/8, WIDTH/25, lo=13, to=4, text='Apply', action='action_apply_resolution')
         self.bool_resolution_button = Button(self, WIDTH//25, HEIGHT//2.25-(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_change_resolution')
         self.bool_music_button = Button(self, WIDTH//25, HEIGHT//2.25, WIDTH/25, WIDTH/25, text='•', action='action_music')
         self.bool_fullscreen_button = Button(self, WIDTH//25, HEIGHT//2.25+(HEIGHT/15.36), WIDTH/25, WIDTH/25, text='•', action='action_fullscreen')
@@ -825,9 +823,10 @@ class App:
         self.check_fullscreen()
         self.game = Game(self)
     def check_fullscreen(self):
-        self.sc = pg.display.set_mode((WIDTH, HEIGHT))
+        self.sc = pg.display.set_mode((800, 600))
         if self.fullscreen:
-            self.sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
+            self.sc = pg.display.set_mode((800, 600), pg.FULLSCREEN)
+        self.actual_sc = pg.display.set_mode((WIDTH, HEIGHT))
             
     def play_music(self):
         self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
@@ -839,13 +838,14 @@ class App:
                 self.exit()
     
     def check_music(self):
+        pg.mixer.music.pause()
         if self.music_state:
             pg.mixer.music.unpause()
-        elif not self.music_state:
-            pg.mixer.music.pause()
     def run(self):
         while True:
             self.game.run()
+            #self.actual_sc.fill((255,255,255))
+            self.actual_sc.blit(pg.transform.smoothscale(self.sc, (WIDTH, HEIGHT)), (0,0))
             self.check_events()
             self.check_music()
             pg.display.update()
