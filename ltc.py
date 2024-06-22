@@ -1,17 +1,10 @@
 '''
 list of some abbreviations in this code
-ln - level number
-sl - spawn location
-fl - finish location
-kb - killblock/killbrick
-plr - player
-l - left; t - top; w - width; h - height
-lo - left offset; to - top offset
-(x)l - x left, (x)w - x width (e.g. zone left)
-clr - colour; hclr - highlight colour; bclr - backup colour; pclr - press colour
-
-list of hotkeys
-space - pause
+ln   - level number
+sl   - spawn location
+fl   - finish location
+kb   - killblock/killbrick
+sspace - pause
 arrow up - previous level
 arrow down - next level
 arrow left - moves character up and left
@@ -23,6 +16,7 @@ backspace - reset resolution to 640, 480
 import pygame as pg, random as r, sys, time
 cursor = pg.Rect(0,0,1,1)
 WIDTH, HEIGHT = 800, 600
+lw, lh = 800, 600
 
 def draw_text(x=0, y=0, data='Text', size=round(32), color=(100,100,100), smooth=1):
     text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
@@ -31,7 +25,7 @@ def draw_text(x=0, y=0, data='Text', size=round(32), color=(100,100,100), smooth
 class Cover:
     def __init__(self, game):
         self.game = game
-        self.cover = pg.Rect(500, 500, 235, 235)
+        self.cover = pg.Rect(500, 500, 296, 296)
         self.cover_img = pg.transform.scale(pg.image.load('assets/cover.png'), (self.cover.width, self.cover.height))
     def run(self):
         self.blit()
@@ -58,8 +52,10 @@ class Cursor:
         self.cursor = cursor
     def run(self):
         self.mouse_x, self.mouse_y = pg.mouse.get_pos()
-        cursor.left = 640*(self.mouse_x/WIDTH)
-        cursor.top  = 480*(self.mouse_y/HEIGHT)
+        cursor.left = 800*(self.mouse_x/WIDTH)
+        cursor.top  = 600*(self.mouse_y/HEIGHT)
+        #cursor.left = self.mouse_x
+        #cursor.top = self.mouse_y
         
 class Particle:
     def __init__(self, player, clr=(0,0,0), dir='random', type='rect', shrink=0):
@@ -104,7 +100,7 @@ class Player:
         self.cursor = Cursor()
         self.get_plr_size()
         self.icons = ['icon_cube', 'icon_box', 'icon_spinned', 'icon_8d']
-        self.plr = pg.Rect(250,250,12,12)
+        self.plr = pg.Rect(250,250,20,20)
         try:
             self.plr_img = pg.transform.smoothscale(pg.image.load('assets/icons/'+self.icon_dir+'/'+r.choice(self.icons)+'.png'), (self.plr.width, self.plr.height))
         except FileNotFoundError:
@@ -132,14 +128,14 @@ class Player:
         
         if self.cap:
             if self.game.app.cap_mode == 0:
-                self.plr.left = self.mouse_x - self.plr.width/2
-                self.plr.top = self.mouse_y - self.plr.height/2
+                self.plr.left = cursor.left - self.plr.width/2
+                self.plr.top = cursor.top - self.plr.height/2
             elif self.game.app.cap_mode == 1:
-                self.plr.left = self.mouse_x - self.plr.width
-                self.plr.top = self.mouse_y - self.plr.height
+                self.plr.left = cursor.left - self.plr.width
+                self.plr.top = cursor.top- self.plr.height
             elif self.game.app.cap_mode == 2:
-                self.plr.left = self.mouse_x
-                self.plr.top = self.mouse_y
+                self.plr.left = cursor.left
+                self.plr.top = cursor.top
         
     def blit(self):
         self.trail()
@@ -231,43 +227,43 @@ class Player:
 class Level:
     def __init__(self, game, ln=0):
         self.game = game
-        self.frame = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
-                     [0,0,2130,HEIGHT],[WIDTH-2130+1,0,2130,HEIGHT]]
+        self.frame = [[0,0,lw, 30],[0,lh-30,lw,32],
+                     [0,0,30,lh],[lw-30+1,0,30+1,lh]]
         self.ln = ln
         self.kb = [
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/25.6667], [0, HEIGHT/25.6667, 2134.3333, HEIGHT/1.0405], [0, HEIGHT/1.0405, WIDTH/1.0, HEIGHT]
+                            [0, 0, lw/1.0, lh/25.6667], [0, lh/25.6667, lw/34.3333, lh/1.0405], [0, lh/1.0405, lw/1.0, lh]
                         ],
                         [
                              self.frame[0], self.frame[1], self.frame[2], self.frame[3],
-                             [WIDTH/1.77, HEIGHT/6.92, WIDTH/24.98, HEIGHT/1.17], [213.2, HEIGHT/2.19, WIDTH/1.83, HEIGHT/17.35],
-                             [WIDTH/1.32, 0, WIDTH/4.11, 160.93], [WIDTH/1.39, HEIGHT/1.42, 213.56, HEIGHT/17.35],
-                             [0, HEIGHT/1.42, WIDTH/2.56, HEIGHT/17.35], [0, 0, WIDTH/6.09, HEIGHT/1.42], [0, 0, WIDTH/2.34, 160.89]
+                             [lw/1.77, lh/6.92, lw/24.98, lh/1.17], [lw/3.2, lh/2.19, lw/1.83, lh/17.35],
+                             [lw/1.32, 0, lw/4.11, lh/3.93], [lw/1.39, lh/1.42, lw/3.56, lh/17.35],
+                             [0, lh/1.42, lw/2.56, lh/17.35], [0, 0, lw/6.09, lh/1.42], [0, 0, lw/2.34, lh/3.89]
                         ], 
                         [
-                              [0, 0, WIDTH/1.0, 1608.4], [0, 1608.4, 1281.5, HEIGHT/1.04], [0, HEIGHT/1.02, WIDTH/1.0, 1608.4], [WIDTH/1.02, 1608.4, 128, HEIGHT/1], [WIDTH/8.58, 1608.4, 26.75, HEIGHT/1.48], [1281.5, HEIGHT/1.1, WIDTH/2.71, HEIGHT/12.8], [WIDTH/2.86, HEIGHT/4.27, 26.75, HEIGHT/1.38], [WIDTH/6.5, HEIGHT/1.54, WIDTH/10.3, HEIGHT/19.2], [213.96, HEIGHT/4.27, WIDTH/10, HEIGHT/19.2], [WIDTH/2.06, 0, 26.75, HEIGHT/1.42], [WIDTH/2.71, HEIGHT/1.16, WIDTH/1.61, HEIGHT/7.68], [WIDTH/1.61, HEIGHT/5.49, 26.75, HEIGHT/1.42], [WIDTH/4.29, HEIGHT/2.26, 26.75, HEIGHT/19.2], [WIDTH/1.32, 0, 26.75, HEIGHT/1.37], [WIDTH/1.12, HEIGHT/5.49, WIDTH/10.3, HEIGHT/1.42]
-
+                              [0, 0, lw/1.0, lh/38.4], [0, lh/38.4, lw/51.5, lh/1.04], [0, lh/1.02, lw/1.0, lh/38.4], [lw/1.02, lh/38.4, lw/5, lh/1], [lw/8.58, lh/38.4, lw/25.75, lh/1.48], [lw/51.5, lh/1.1, lw/2.71, lh/12.8], [lw/2.86, lh/4.27, lw/25.75, lh/1.38], [lw/6.5, lh/1.54, lw/10.3, lh/19.2], [lw/3.96, lh/4.27, lw/10, lh/19.2], [lw/2.06, 0, lw/25.75, lh/1.42], [lw/2.71, lh/1.16, lw/1.61, lh/7.68], [lw/1.61, lh/5.49, lw/25.75, lh/1.42], [lw/4.29, lh/2.26, lw/25.75, lh/19.2], [lw/1.32, 0, lw/25.75, lh/1.37], [lw/1.12, lh/5.49, lw/10.3, lh/1.42]
                         ],      
                         [
-                            [0, 0, WIDTH/1.0, HEIGHT/21.0], [0, HEIGHT/1.0471, WIDTH/1.0, HEIGHT/21.0], [0, 0, 2130.0, HEIGHT/1.0], [WIDTH/1.0334, 0, 2130.0, HEIGHT/1.0], [WIDTH/10.3, 0, WIDTH/4.2917, HEIGHT/4.2778], [0, HEIGHT/2.9615, 213.0294, HEIGHT/7.7], [WIDTH/2.4524, 0, WIDTH/10.3, HEIGHT/1.3276], [213.9615, HEIGHT/2.5389, WIDTH/12.875, 160.2], [WIDTH/10.3, HEIGHT/1.8333, WIDTH/6.4375, HEIGHT/5.625], [WIDTH/10.3, HEIGHT/2.2389, WIDTH/12.875, 1600.5], [1281.5, HEIGHT/1.1667, WIDTH/1.051, HEIGHT/9.625], [WIDTH/2.1458, 0, WIDTH/1.9808, HEIGHT/6.4167], [WIDTH/1.1196, HEIGHT/6.4167, WIDTH/12.875, HEIGHT/1.6042], [WIDTH/1.3205, HEIGHT/4.2778, 26.75, HEIGHT/1.5], [WIDTH/1.6613, HEIGHT/4.2778, WIDTH/17.1667, HEIGHT/1.925]
+                            [0, 0, lw/1.0, lh/21.0], [0, lh/1.0471, lw/1.0, lh/21.0], [0, 0, lw/30.0, lh/1.0], [lw/1.0334, 0, lw/30.0, lh/1.0], [lw/10.3, 0, lw/4.2917, lh/4.2778], [0, lh/2.9615, lw/3.0294, lh/7.7], [lw/2.4524, 0, lw/10.3, lh/1.3276], [lw/3.9615, lh/2.5389, lw/12.875, lh/3.2], [lw/10.3, lh/1.8333, lw/6.4375, lh/5.625], [lw/10.3, lh/2.2389, lw/12.875, lh/30.5], [lw/51.5, lh/1.1667, lw/1.051, lh/9.625], [lw/2.1458, 0, lw/1.9808, lh/6.4167], [lw/1.1196, lh/6.4167, lw/12.875, lh/1.6042], [lw/1.3205, lh/4.2778, lw/25.75, lh/1.5], [lw/1.6613, lh/4.2778, lw/17.1667, lh/1.925]
                         ],
                         [
-                            [0, 0, 2134.3333, HEIGHT/1.0], [2134.3333, 0, WIDTH/1.03, HEIGHT/25.6667], [WIDTH/1.03, HEIGHT/25.6667, 2134.3333, HEIGHT/1], [2134.3333, HEIGHT/1.0405, WIDTH/1.03, HEIGHT], [2134.3333, HEIGHT/25.6667, WIDTH/4.4783, HEIGHT/4.2778], [WIDTH/2.8611, 0, 427373, 160.6667], [WIDTH/9.3636, HEIGHT/2.5667, WIDTH/1.6094, HEIGHT/2.2], [WIDTH/1.4733, HEIGHT/1.7111, WIDTH/2.12, HEIGHT/9.625]
+                            [0, 0, lw/34.3333, lh/1.0], [lw/34.3333, 0, lw/1.03, lh/25.6667], [lw/1.03, lh/25.6667, lw/34.3333, lh/1], [lw/34.3333, lh/1.0405, lw/1.03, lh], [lw/34.3333, lh/25.6667, lw/4.4783, lh/4.2778], [lw/2.8611, 0, lw/1.5373, lh/3.6667], [lw/9.3636, lh/2.5667, lw/1.6094, lh/2.2], [lw/1.4733, lh/1.7111, lw/2.12, lh/9.625]
                         ]
+                        # Levels data before this string should be reworked
                   ]
         self.sl = [
-                    [WIDTH/2, HEIGHT/2],
-                    [128, HEIGHT/1.2],
-                    [32.5, HEIGHT/13.4],
-                    [WIDTH/17.167, HEIGHT/7],
-                    [213.5, HEIGHT/24]
+                    [lw/2, lh/2],
+                    [lw/5, lh/1.2],
+                    [lw/20.5, lh/13.4],
+                    [lw/17.167, lh/7],
+                    [lw/3.5, lh/24]
                   ]
         self.fl = [
-                    [WIDTH/1.03, 0, WIDTH, HEIGHT], 
-                    [WIDTH/1.33, HEIGHT/1.322, WIDTH/4.39, HEIGHT/2.48],
-                    [WIDTH/1.12, 1608.4, WIDTH, HEIGHT],
-                    [213.179, HEIGHT/42.78, WIDTH/9.1964, HEIGHT/7],
-                    [WIDTH/1.4733, HEIGHT/1.5528, WIDTH/2.12, HEIGHT/6.4167]
+                    [lw/1.03, 0, lw, lh], 
+                    [lw/1.33, lh/1.322, lw/4.39, lh/2.48],
+                    [lw/1.12, lh/38.4, lw, lh],
+                    [lw/3.179, lh/42.78, lw/9.1964, lh/7],
+                    [lw/1.4733, lh/1.5528, lw/2.12, lh/6.4167]
                   ]
         self.key = Key(self, l=500, t=500)
         self.chaser = Chase(self, zl=100, zt=100, zw=400, zh=400, speed=2)
@@ -275,18 +271,18 @@ class Level:
         self.keys = [ # List
                         [], [], [],  # Level
                         [
-                            [128.33678, HEIGHT/2.01044, self.key.key.width, self.key.key.height], # Keys
-                            [WIDTH/1.1087, HEIGHT/1.248, self.key.key.width, self.key.key.height]
+                            [lw/5.33678, lh/2.01044, self.key.key.width, self.key.key.height], # Keys
+                            [lw/1.1087, lh/1.248, self.key.key.width, self.key.key.height]
                         ]
                     ]
         self.key_kb = [ # List
                                [], [], [], # Level
                                [ # Key
                                   [ # Linked blocks | Note: Will be drew only if key is assigned
-                                      [WIDTH/1.9846, HEIGHT/1.4051, 213.9, HEIGHT/24.8387]
+                                      [lw/1.9846, lh/1.4051, lw/3.9, lh/24.8387]
                                   ],
                                   [
-                                      [213.0383, HEIGHT/7.33, WIDTH/10.875, 60.405]
+                                      [lw/3.0383, lh/7.33, lw/10.875, lh/8.405]
                                   ],      
                                ]
                        ]
@@ -313,6 +309,7 @@ class Level:
             self.fl.append([r.randint(0,WIDTH),r.randint(0,HEIGHT),r.randint(0,100),r.randint(0,100)])
             self.keys.append([])
             self.cover_use.append(r.randint(0,1))
+            self.chase_use.append(0)
             
 
         
@@ -327,11 +324,11 @@ class Level:
             draw_text(x=29, y=29*3, data='To move your character, cover your cursor over it to capture him, and then move your cursor ', size=13, color=(0,0,0))
             draw_text(x=29, y=29*7, data='Red rectangles will lead you to next level', size=13, color=(0,0,0))
         if self.ln == 1:
-            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Black rectangles can kill you', size=13, color=(0,0,0))
+            draw_text(x=53, y=470, data='Black rectangles can kill you', size=13, color=(0,0,0))
         if self.ln == 3:
-            draw_text(x=WIDTH/15, y=WIDTH/1.7, data='Collect keys in order to open some (unmarked) gates', size=13, color=(0,0,0))
+            draw_text(x=53, y=470, data='Collect keys in order to open some (unmarked) gates', size=13, color=(0,0,0))
         if self.ln == 4:
-            draw_text(x=WIDTH/2, y=WIDTH/40, data='Some levels can be really dark', size=13, color=(255,255,255))
+            draw_text(x=400, y=20, data='Some levels can be really dark', size=13, color=(255,255,255))
         
     def run(self):
         if self.ln == 5:
@@ -361,7 +358,7 @@ class Chase:
     def __init__(self, level, l=0, t=0, zl=400, zt=400, zw=400, zh=200, speed=1):
         self.level = level
         self.zone = pg.Rect(zl, zt, zw, zh)
-        self.chaser = pg.Rect(zl+zw/2,zt+zh/2,32,32)
+        self.chaser = pg.Rect(zl+zw/2,zt+zh/2,50,50)
         self.chaser_img = pg.transform.smoothscale(pg.image.load('assets/chaser.png'), (self.chaser.width, self.chaser.height))
         self.chasing = 1
         self.frame = 0
@@ -412,8 +409,8 @@ class Chase:
 class Key:
     def __init__(self, level, l=0, t=0):
         self.level = level
-        self.key = pg.Rect(l,t,26.6,HEIGHT/40.421)
-        self.key_img = pg.transform.scale(pg.image.load('assets/key.png'), (self.key.width, self.key.height))
+        self.key = pg.Rect(l,t,32,15)
+        self.key_img = pg.transform.smoothscale(pg.image.load('assets/key.png'), (self.key.width, self.key.height))
         
     def run(self):
         self.level.app.sc.blit(self.key_img,(self.key.left,self.key.top))
@@ -435,7 +432,7 @@ class Button:
         self.game = game
         self.shadow = shadow
         self.shadow_rect = pg.Rect(l+2,t+2,w,h)
-        self.font = pg.font.SysFont('Courier new', 25)  
+        self.font = pg.font.SysFont('Courier new', 30)  
         self.text = self.font.render(text,1,(0,0,0))
         self.clr = clr
         self.bclr = clr
@@ -544,7 +541,7 @@ class Game:
         self.tab = 'menu'
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
         self.resolution = 0
-        self.resolutions_list = [[640, 480], [800, 600], [1024, 768]]
+        self.resolutions_list = [[800, 600], [1024, 768]]
         for i in range(len(self.resolutions_list)):
             if [WIDTH, HEIGHT] == self.resolutions_list[i]:
                 self.resolution = i
@@ -553,39 +550,40 @@ class Game:
         self.debug = 1
         self.bg_clr = (5, 5, 5)
         
-        self.font = pg.font.SysFont('Courier new', 31)
-        self.editor_font = pg.font.SysFont('Courier new', 9)
+        self.font = pg.font.SysFont('Courier new', 39)
+        self.editor_font = pg.font.SysFont('Courier new', 12)
         
         
         # Main Menu
-        self.play_button = Button(self, 0, 160, 96, 48, text='Play', action='play', to=-3.84)
-        self.icons_button = Button(self, 0, 160+60, 96, 48, text='Avatar', lo=16, to=-3.84, action='icons')
-        self.editor_button = Button(self, 0, 160+(60)*2, 96, 48, text='Editor', lo=16, to=-3.84, action='editor') 
-        self.settings_button = Button(self, 0, 160+(60)*3, 128, 48, text='Settings', lo=18, to=-3.84, action='settings') 
-        self.continue_button = Button(self, 0, 160, 128, 48, text='Continue', lo=18, to=-3.84, action='play')
-        self.menu_button = Button(self, 0, 160+(60), 128, 48, text='To Menu', action='menu', lo=16, to=-3.84)
-        self.exit_button = Button(self, 0, 160+(60)*4, 96, 48, text='Exit', action='leave', to=-3.84)
+        self.play_button = Button(self, 0, 200, 120, 60, text='Play', action='play', to=-4.8)
+        self.icons_button = Button(self, 0, 200+75, 120, 60, text='Avatar', lo=16, to=-4.8, action='icons')
+        self.editor_button = Button(self, 0, 200+(75)*2, 120, 60, text='Editor', lo=16, to=-4.8, action='editor') 
+        self.settings_button = Button(self, 0, 200+(75)*3, 133, 60, text='Options', lo=23, to=-4.8, action='settings') 
+        self.continue_button = Button(self, 0, 200, 75, 60, text='Continue', lo=23, to=-4.8, action='play')
+        self.menu_button = Button(self, 0, 200+(75), 75, 60, text='To Menu', action='menu', lo=16, to=-4.8)
+        self.exit_button = Button(self, 0, 200+(75)*4, 120, 60, text='Exit', action='leave', to=-4.8)
         
         self.logo = pg.Rect(0, 10, WIDTH/4, (WIDTH/4)/1.45)
         #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
         
         # Settings
-        self.apply_resolution_button = Button(self, 337, 213-(32), WIDTH/8, 26, lo=13, to=4, text='Apply', action='action_apply_resolution')
-        self.bool_resolution_button = Button(self, 26, 213-(32), 26, 26, text='•', action='action_change_resolution')
-        self.bool_music_button = Button(self, 26, 213, 26, 26, text='•', action='action_music')
-        self.bool_fullscreen_button = Button(self, 26, 213+(32), 26, 26, text='•', action='action_fullscreen')
-        self.bool_capmode_button = Button(self, 26, 213+(32)*2, 26, 26, text='•', action='action_cap_mode')
+        self.apply_resolution_button = Button(self, 421, 267-(39), 100, 32, lo=13, to=4, text='Apply', action='action_apply_resolution')
+        self.bool_resolution_button = Button(self, WIDTH//25, 267-(39), 32, 32, text='•', action='action_change_resolution')
+        self.bool_music_button = Button(self, WIDTH//25, 267, 32, 32, text='•', action='action_music')
+        self.bool_fullscreen_button = Button(self, WIDTH//25, 267+(39), 32, 32, text='•', action='action_fullscreen')
+        self.bool_capmode_button = Button(self, WIDTH//25, 267+(39)*2, 32, 32, text='•', action='action_cap_mode')
         self.action = ''
         
         self.set_w, self.set_h = WIDTH, HEIGHT
         
-        self.back_button = Button(self, 0, 0, 32, 32, text='←', action='menu', to=3.84)
+        self.back_button = Button(self, 0, 0, 40, 40, text='←', action='menu', to=4.8)
+    
         
         # Editor
         self.obj_list = self.level.frame
         self.grid_size = 10
         self.gridlist = []
-        self.left, self.top, self.right, self.bottom = 0, 0, 0, 0 # To prevent crashes
+        self.left, self.top, self.right, self.bottom = 0, 0, 0, 0 
         self.update_grid()
     def background(self):
         app.sc.fill(self.bg_clr)
@@ -649,8 +647,7 @@ class Game:
                 print(self.right, self.bottom)
                 
             if self.input[pg.K_UP]:
-                self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
-                                [0,0,2130,HEIGHT],[WIDTH-2130+1,0,2130,HEIGHT]]
+                self.obj_list = self.level.frame
             if self.input[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
@@ -718,10 +715,10 @@ class Game:
         elif self.tab == 'icons':
             self.back_button.run()
         elif self.tab == 'settings':
-            app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(64,240-(32)*2))
-            app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(64,240-(32)))
-            app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(64,240))
-            app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(64,240+(32)))
+            app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(80,300-(39)*2))
+            app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(80,300-(39)))
+            app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(80,300))
+            app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(80,300+(39)))
             
             self.bool_resolution_button.run()
             self.apply_resolution_button.run()
@@ -760,7 +757,7 @@ class Game:
                 self.app.set_resolution()
                 self.set()
         elif self.tab == 'pause':
-            draw_text(data='Paused', size=round(WIDTH/10), color=(0,0,0))
+            draw_text(data='Paused', size=80, color=(0,0,0))
             self.continue_button.run()
             self.menu_button.run()
         elif self.tab == 'play':
@@ -827,7 +824,7 @@ class App:
         if self.fullscreen:
             self.actual_sc = pg.display.set_mode((WIDTH, HEIGHT), pg.FULLSCREEN)
         #self.sc = self.actual_sc.copy()
-        self.sc = pg.Surface((640, 480))
+        self.sc = pg.Surface((lw, lh))
             
     def play_music(self):
         self.music = pg.mixer.music.load('assets/bullfrog_report_th.mp3')
@@ -847,7 +844,6 @@ class App:
             self.game.run()
             #self.actual_sc.fill((255,255,255))
             self.actual_sc.blit(pg.transform.smoothscale(self.sc, (WIDTH, HEIGHT)), (0,0))
-            #self.actual_sc.blit(self.sc, (0,0))
             self.check_events()
             self.check_music()
             pg.display.update()
