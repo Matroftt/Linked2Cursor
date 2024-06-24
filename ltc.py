@@ -1,10 +1,18 @@
 '''
 list of some abbreviations in this code
-ln   - level number
-sl   - spawn location
-fl   - finish location
-kb   - killblock/killbrick
-sspace - pause
+ln - level number
+sl - spawn location
+fl - finish location
+kb - killblock/killbrick
+plr - player
+l - left; t - top; w - width; h - height
+lo - left offset; to - top offset
+lw, lh - level width, level height
+(x)l - x left, (x)w - x width (e.g. zone left)
+
+clr - colour; hclr - highlight colour; bclr - backup colour; pclr - press colour
+list of hotkeys
+space - pause
 arrow up - previous level
 arrow down - next level
 arrow left - moves character up and left
@@ -18,10 +26,17 @@ cursor = pg.Rect(0,0,1,1)
 WIDTH, HEIGHT = 800, 600
 lw, lh = 800, 600
 
-def draw_text(x=0, y=0, data='Text', size=round(32), color=(100,100,100), smooth=1):
-    text = pg.font.SysFont('Courier new', size).render(data, smooth, color)
+def draw_text(x=0, y=0, data='Text', size=32, color=(0, 255, 0), smooth=1):
+    text = app.font.fonts[size].render(data, smooth, color)
     app.sc.blit(text,(x,y))
     
+
+class Font:
+    def __init__(self, app):
+        self.app = app
+        self.fonts = []
+        for i in range(100):
+            self.fonts.append(pg.font.SysFont('Courier new', i))
 class Cover:
     def __init__(self, game):
         self.game = game
@@ -52,8 +67,8 @@ class Cursor:
         self.cursor = cursor
     def run(self):
         self.mouse_x, self.mouse_y = pg.mouse.get_pos()
-        cursor.left = 800*(self.mouse_x/WIDTH)
-        cursor.top  = 600*(self.mouse_y/HEIGHT)
+        cursor.left = lw*(self.mouse_x/WIDTH)
+        cursor.top  = lh*(self.mouse_y/HEIGHT)
         #cursor.left = self.mouse_x
         #cursor.top = self.mouse_y
         
@@ -248,6 +263,9 @@ class Level:
                         ],
                         [
                             [0, 0, lw/34.3333, lh/1.0], [lw/34.3333, 0, lw/1.03, lh/25.6667], [lw/1.03, lh/25.6667, lw/34.3333, lh/1], [lw/34.3333, lh/1.0405, lw/1.03, lh], [lw/34.3333, lh/25.6667, lw/4.4783, lh/4.2778], [lw/2.8611, 0, lw/1.5373, lh/3.6667], [lw/9.3636, lh/2.5667, lw/1.6094, lh/2.2], [lw/1.4733, lh/1.7111, lw/2.12, lh/9.625]
+                        ],
+                        [
+                            [0, 0, 800, 30], [0, 570, 800, 32], [0, 0, 30, 600], [771, 0, 31, 600], [320, 240, 50, 60], [440, 220, 120, 80], [460, 130, 80, 50], [150, 80, 130, 120], [160, 320, 160, 120], [340, 310, 40, 50], [330, 410, 240, 110], [400, 280, 40, 90], [380, 310, 10, 10], [490, 330, 300, 130], [520, 90, 280, 130], [160, 230, 120, 70], [220, 210, 10, 20], [180, 300, 80, 10], [280, 120, 100, 80], [70, 320, 90, 20], [30, 210, 90, 90], [30, 370, 80, 70], [200, 440, 20, 90], [200, 550, 20, 20], [160, 440, 20, 20], [160, 480, 20, 90], [130, 440, 30, 20], [120, 460, 20, 60], [120, 540, 20, 10], [50, 480, 80, 20], [80, 460, 10, 10], [50, 440, 10, 10], [430, 520, 10, 30], [470, 520, 30, 10], [470, 560, 30, 20], [350, 520, 10, 30], [380, 540, 10, 20], [280, 520, 20, 10], [240, 530, 50, 30], [260, 460, 20, 40], [240, 490, 20, 20], [250, 510, 10, 10], [220, 450, 20, 20], [290, 470, 20, 10], [320, 500, 10, 10], [310, 440, 10, 10], [50, 500, 5, 50], [55, 545, 40, 5], [90, 520, 5, 25], [70, 520, 20, 5], [70, 525, 5, 10], [595, 460, 5, 60], [620, 520, 10, 50], [660, 450, 15, 75], [700, 500, 20, 60], [750, 450, 25, 75], [700, 470, 60, 10], [630, 530, 10, 10], [540, 530, 20, 20], [580, 550, 20, 20], [440, 340, 20, 20], [480, 320, 10, 20], [450, 300, 10, 10], [530, 300, 20, 10], [490, 320, 20, 10], [590, 250, 150, 50], [590, 300, 10, 10], [610, 240, 10, 10], [620, 300, 20, 10], [640, 240, 20, 10], [670, 300, 30, 10], [710, 240, 30, 10], [680, 220, 10, 10], [720, 320, 20, 10], [50, 160, 100, 10], [30, 110, 100, 10], [50, 80, 100, 10], [50, 120, 10, 20], [120, 140, 10, 20], [80, 135, 5, 5], [90, 130, 5, 5], [105, 155, 5, 5], [50, 30, 230, 30], [300, 30, 470, 30], [289, 84, 5, 11], [303, 83, 8, 13], [317, 84, 5, 10], [333, 84, 6, 8], [346, 87, 6, 9], [362, 85, 18, 17], [388, 84, 9, 6], [405, 85, 15, 8], [428, 87, 9, 36], [433, 90, 19, 13], [463, 92, 19, 10], [470, 124, 12, 5], [617, 16, 168, 130], [486, 93, 3, 8], [516, 95, 6, 3], [455, 170, 5, 5], [445, 165, 5, 5], [435, 145, 5, 5], [405, 115, 25, 10], [410, 145, 5, 5], [390, 145, 5, 5], [405, 170, 5, 5], [420, 185, 5, 10], [440, 200, 5, 0], [430, 195, 70, 5], [390, 230, 30, 30], [330, 200, 10, 20], [360, 220, 10, 20], [300, 240, 20, 10], [300, 220, 10, 20], [280, 270, 20, 10], [290, 300, 10, 20], [361, 376, 55, 11], [430, 375, 10, 5], [430, 385, 10, 5], [470, 405, 5, 5], [460, 370, 10, 10], [310, 540, 5, 5], [620, 460, 10, 10], [740, 550, 10, 10]
                         ]
                         # Levels data before this string should be reworked
                   ]
@@ -256,14 +274,15 @@ class Level:
                     [lw/5, lh/1.2],
                     [lw/20.5, lh/13.4],
                     [lw/17.167, lh/7],
-                    [lw/3.5, lh/24]
+                    [lw/3.5, lh/24],
+                    [663, 549]
                   ]
         self.fl = [
                     [lw/1.03, 0, lw, lh], 
                     [lw/1.33, lh/1.322, lw/4.39, lh/2.48],
                     [lw/1.12, lh/38.4, lw, lh],
                     [lw/3.179, lh/42.78, lw/9.1964, lh/7],
-                    [lw/1.4733, lh/1.5528, lw/2.12, lh/6.4167]
+                    [lw/1.4733, lh/1.5528, lw/2.12, lh/6.4167],
                   ]
         self.key = Key(self, l=500, t=500)
         self.chaser = Chase(self, zl=100, zt=100, zw=400, zh=400, speed=2)
@@ -289,8 +308,8 @@ class Level:
         self.keys_backup, self.key_kb_backup = self.keys, self.key_kb
         
         self.key_use = []
-        self.cover_use = [0,0,0,0,1,0]
-        self.chase_use = [0,0,0,0,0,1]
+        self.cover_use = [0,0,0,0,1,0,0]
+        self.chase_use = [0,0,0,0,0,0,1]
         self.fillers()
         
         for i in range(len(self.keys)):
@@ -331,7 +350,7 @@ class Level:
             draw_text(x=400, y=20, data='Some levels can be really dark', size=13, color=(255,255,255))
         
     def run(self):
-        if self.ln == 5:
+        if self.chase_use[self.ln]:
             self.chaser.run()
         self.game.player.blit()
         self.game.finish = Obstacle(self.game, self.fl[self.ln][0], self.fl[self.ln][1], self.fl[self.ln][2], self.fl[self.ln][3], type='finish')
@@ -541,7 +560,7 @@ class Game:
         self.tab = 'menu'
         self.cap_mode_hint = ['Middle', 'Bottom-right', 'Top-left']
         self.resolution = 0
-        self.resolutions_list = [[800, 600], [1024, 768]]
+        self.resolutions_list = [[800, 600], [1024, 768], [1440, 1080], [1366, 768], [1440, 900], [1920, 1080]] # 1440x1080 and 1920x1080 can be laggy
         for i in range(len(self.resolutions_list)):
             if [WIDTH, HEIGHT] == self.resolutions_list[i]:
                 self.resolution = i
@@ -559,19 +578,23 @@ class Game:
         self.icons_button = Button(self, 0, 200+75, 120, 60, text='Avatar', lo=16, to=-4.8, action='icons')
         self.editor_button = Button(self, 0, 200+(75)*2, 120, 60, text='Editor', lo=16, to=-4.8, action='editor') 
         self.settings_button = Button(self, 0, 200+(75)*3, 133, 60, text='Options', lo=23, to=-4.8, action='settings') 
-        self.continue_button = Button(self, 0, 200, 75, 60, text='Continue', lo=23, to=-4.8, action='play')
-        self.menu_button = Button(self, 0, 200+(75), 75, 60, text='To Menu', action='menu', lo=16, to=-4.8)
+        self.continue_button = Button(self, 0, 200, 150, 60, text='Continue', lo=23, to=-4.8, action='play')
+        self.menu_button = Button(self, 0, 200+(75), 150, 60, text='To Menu', action='menu', lo=16, to=-4.8)
         self.exit_button = Button(self, 0, 200+(75)*4, 120, 60, text='Exit', action='leave', to=-4.8)
         
         self.logo = pg.Rect(0, 10, WIDTH/4, (WIDTH/4)/1.45)
         #self.logo_img = self.plr_img = pg.transform.scale(pg.image.load('assets/logo.png'), (self.logo.width, self.logo.height))
         
         # Settings
-        self.apply_resolution_button = Button(self, 421, 267-(39), 100, 32, lo=13, to=4, text='Apply', action='action_apply_resolution')
-        self.bool_resolution_button = Button(self, WIDTH//25, 267-(39), 32, 32, text='•', action='action_change_resolution')
-        self.bool_music_button = Button(self, WIDTH//25, 267, 32, 32, text='•', action='action_music')
-        self.bool_fullscreen_button = Button(self, WIDTH//25, 267+(39), 32, 32, text='•', action='action_fullscreen')
-        self.bool_capmode_button = Button(self, WIDTH//25, 267+(39)*2, 32, 32, text='•', action='action_cap_mode')
+        self.apply_resolution_button = Button(self, 421, 200, 100, 32, lo=13, to=4, text='Apply', action='action_apply_resolution')
+        self.bool_resolution_button = Button(self, 40, 200, 32, 32, text='•', action='action_change_resolution')
+        self.bool_music_button = Button(self, 40, 200+39*1, 32, 32, text='•', action='action_music')
+        self.bool_fullscreen_button = Button(self, 40, 200+39*2, 32, 32, text='•', action='action_fullscreen')
+        self.bool_smooth_button = Button(self, 40, 200+39*3, 32, 32, text='•', action='action_smooth')
+        self.bool_showfps_button = Button(self, 40, 200+39*4, 32, 32, text='•', action='action_fps')
+        self.bool_capmode_button = Button(self, 40, 200+39*5, 32, 32, text='•', action='action_cap_mode')
+        
+        
         self.action = ''
         
         self.set_w, self.set_h = WIDTH, HEIGHT
@@ -651,25 +674,24 @@ class Game:
             if self.input[pg.K_DOWN]:
                 for i in range(len(self.obj_list)):
                     if self.obj_list[i][0] != 0:
-                        self.obj_list[i][0] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][0],4))
+                        self.obj_list[i][0] = round(self.obj_list[i][0],4)
                     else:
                         self.obj_list[i][0] = 0
                     if self.obj_list[i][1] != 0:
-                        self.obj_list[i][1] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][1],4))
+                        self.obj_list[i][1] = round(self.obj_list[i][1],4)
                     else:
                         self.obj_list[i][1] = 0
                     if self.obj_list[i][2] != 0:
-                        self.obj_list[i][2] = 'WIDTH/'+str(round(WIDTH/self.obj_list[i][2],4))
+                        self.obj_list[i][2] = round(self.obj_list[i][2],4)
                     else:
                         self.obj_list[i][2] = 0
                     if self.obj_list[i][3] != 0:
-                        self.obj_list[i][3] = 'HEIGHT/'+str(round(HEIGHT/self.obj_list[i][3],4))
+                        self.obj_list[i][3] = round(self.obj_list[i][3],4)
                     else:
                         self.obj_list[i][3] = 0
                              
                 print(self.obj_list)
-                self.obj_list = [[0,0,WIDTH,HEIGHT/21],[0,HEIGHT-HEIGHT/21+2,WIDTH,HEIGHT/21],
-                                 [0,0,2130,HEIGHT],[WIDTH-2130+1,0,2130,HEIGHT]]
+                self.obj_list = self.level.frame
                 time.sleep(0.33)
                 
             if self.input[pg.K_RIGHT]:
@@ -715,10 +737,12 @@ class Game:
         elif self.tab == 'icons':
             self.back_button.run()
         elif self.tab == 'settings':
-            app.sc.blit(self.font.render('Res: '+str(self.set_w)+'; '+str(self.set_h),1,(0,0,0)),(80,300-(39)*2))
-            app.sc.blit(self.font.render('Music: '+str(self.app.music_state),1,(0,0,0)),(80,300-(39)))
-            app.sc.blit(self.font.render('Fullscreen: '+str(self.app.fullscreen),1,(0,0,0)),(80,300))
-            app.sc.blit(self.font.render('Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')',1,(0,0,0)),(80,300+(39)))
+            draw_text(x=88, y=200, data='Res: '+str(self.set_w)+'; '+str(self.set_h), size=39, color=(0,0,0))
+            draw_text(x=88, y=200+39*1, data='Music: '+str(self.app.music_state), size=39, color=(0,0,0))
+            draw_text(x=88, y=200+39*2, data='Fullscreen: '+str(self.app.fullscreen), size=39, color=(0,0,0))
+            draw_text(x=88, y=200+39*3, data='Smooth screen: '+str(self.app.smoothing_screen), size=39, color=(0,0,0))
+            draw_text(x=88, y=200+39*4, data='Show FPS: '+str(self.app.show_fps), size=39, color=(0,0,0))
+            draw_text(x=88, y=200+39*5, data='Cap mode: '+str(self.app.cap_mode)+' ('+self.cap_mode_hint[self.app.cap_mode]+')', size=39, color=(0,0,0))
             
             self.bool_resolution_button.run()
             self.apply_resolution_button.run()
@@ -726,7 +750,11 @@ class Game:
             self.bool_music_button.run()
             self.bool_fullscreen_button.run()
             self.bool_capmode_button.run()
+            self.bool_smooth_button.run()
+            self.bool_showfps_button.run()
+            
             self.back_button.run()
+            
             
             if self.action == 'music':
                 if self.app.music_state:
@@ -746,6 +774,19 @@ class Game:
                 if self.app.cap_mode > 2:
                     self.app.cap_mode = 0
                 self.set()
+            if self.action == 'fps':
+                if self.app.show_fps:
+                    self.app.show_fps = 0
+                else:
+                    self.app.show_fps = 1
+                self.set()
+            
+            if self.action == 'smooth':
+                if self.app.smoothing_screen:
+                    self.app.smoothing_screen = 0
+                else:
+                    self.app.smoothing_screen = 1
+                self.set()
             if self.action == 'change_resolution':
                 self.set_w, self.set_h = self.resolutions_list[self.resolution-1][0], self.resolutions_list[self.resolution-1][1]
                 self.resolution -= 1
@@ -762,7 +803,8 @@ class Game:
             self.menu_button.run()
         elif self.tab == 'play':
             self.player.instance()
-            self.player.check()
+            if self.input[pg.K_TAB] == False: # Press TAB to noclip
+                self.player.check()
             self.level.run()
             if self.input[pg.K_UP]:
                 self.level.ln -= 1
@@ -790,11 +832,18 @@ class App:
         pg.mixer.init()
         self.clock = pg.time.Clock()
         self.set_prefs()
-        self.read_config()
+        try:
+            self.read_config()
+        except:
+            self.write_config(defaults=1)
+            print('[!] cfg.txt is corrupted, now restored to default')
+            self.read_config()
         self.check_music()
         self.play_music()
+        self.font = Font(self)
         self.game = Game(self)
-    
+        font = pg.font.SysFont('Courier new', 32)
+        
     def exit(self):
         pg.quit()
         sys.exit()
@@ -807,15 +856,22 @@ class App:
         WIDTH, HEIGHT = int(self.config.readline()), int(self.config.readline())
         self.music_state = int(self.config.readline())
         self.fullscreen = int(self.config.readline())
+        self.smoothing_screen = int(self.config.readline())
+        self.show_fps = int(self.config.readline())
         self.cap_mode = int(self.config.readline())
         self.check_fullscreen()
         self.config.close()
-    def write_config(self):
-        self.config = open('assets/cfg.txt', 'w')
-        self.config.write(str(WIDTH)+'\n'+str(HEIGHT)+'\n'+str(self.music_state)+'\n'+str(self.fullscreen)+'\n'+str(self.cap_mode))
-        self.config.close()
-        self.config = open('assets/cfg.txt', 'r')
-        print(self.config.read())
+        
+        
+    def write_config(self, defaults=0):
+        if defaults != 1:
+            self.config = open('assets/cfg.txt', 'w')
+            self.config.write(str(WIDTH)+'\n'+str(HEIGHT)+'\n'+str(self.music_state)+'\n'+str(self.fullscreen)+'\n'+str(self.smoothing_screen)+'\n'+str(self.show_fps)+'\n'+str(self.cap_mode))
+            self.config.close()
+        else:
+            self.config = open('assets/cfg.txt', 'w')
+            self.config.write('800\n600\n0\n0\n1\n1\n0')
+            self.config.close()
     def set_resolution(self):
         self.check_fullscreen()
         self.game = Game(self)
@@ -842,13 +898,16 @@ class App:
     def run(self):
         while True:
             self.game.run()
-            #self.actual_sc.fill((255,255,255))
-            self.actual_sc.blit(pg.transform.smoothscale(self.sc, (WIDTH, HEIGHT)), (0,0))
+            if self.show_fps:
+                draw_text(x=lw-39, y=0, data=str(round(self.clock.get_fps())))
+            if self.smoothing_screen:
+                self.actual_sc.blit(pg.transform.smoothscale(self.sc, (WIDTH, HEIGHT)), (0,0))
+            else:
+                self.actual_sc.blit(pg.transform.scale(self.sc, (WIDTH, HEIGHT)), (0,0))
             self.check_events()
             self.check_music()
             pg.display.update()
-            pg.display.flip()
-            self.clock.tick(75)
+            self.clock.tick(60)
 
 if __name__ == '__main__':
     app = App()
